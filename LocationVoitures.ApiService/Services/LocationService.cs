@@ -17,4 +17,12 @@ public class LocationService
             throw new ArgumentException("La date de fin doit etre superieure ou egale a la date de debut.");
         }
     }
+
+    public void ValiderLoueurAutorise(bool estBlacklist)
+    {
+        if (estBlacklist)
+        {
+            throw new InvalidOperationException("Ce loueur est blackliste et ne peut pas effectuer de reservation.");
+        }
+    }
 }

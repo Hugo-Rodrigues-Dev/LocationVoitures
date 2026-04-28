@@ -54,4 +54,12 @@ public class LocationServiceTests
 
         Assert.Throws<ArgumentException>(() => action());
     }
+
+    [Test]
+    public void ValiderLoueurAutorise_ShouldThrow_WhenLoueurIsBlacklisted()
+    {
+        var action = () => _service.ValiderLoueurAutorise(true);
+
+        Assert.Throws<InvalidOperationException>(() => action());
+    }
 }

@@ -32,6 +32,15 @@ public static class ReserverEndpoint
                 return Results.NotFound($"Aucun loueur trouve pour l'identifiant {request.LoueurId}.");
             }
 
+            try
+            {
+                service.ValiderLoueurAutorise(loueur.EstBlacklist);
+            }
+            catch (InvalidOperationException exception)
+            {
+                return Results.Conflict(exception.Message);
+            }
+
             var indisponible = await db.Locations.AnyAsync(location =>
                 location.VoitureId == voiture.Id &&
                 !location.Annule &&

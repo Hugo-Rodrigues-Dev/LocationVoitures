@@ -8,6 +8,12 @@ Il est mis a jour a chaque etape.
 Ce qui est expose dans l'API pour l'instant :
 
 - `GET /`
+- `GET /loueurs`
+- `GET /loueurs/{id}`
+- `GET /loueurs/mobile/{mobile}`
+- `POST /loueurs`
+- `PUT /loueurs/{id}`
+- `PATCH /loueurs/{id}/blacklist`
 - `GET /voitures`
 - `GET /voitures/{id}`
 - `GET /voitures/immatriculation/{immatriculation}`
@@ -23,11 +29,12 @@ Ce qui est expose dans l'API pour l'instant :
 
 ### 1. Creation de la solution
 
-Statut : `Partiellement fait`
+Statut : `Fait`
 
 Fait :
 
 - solution Aspire creee avec les projets `LocationVoitures.AppHost`, `LocationVoitures.ApiService`, `LocationVoitures.Web`, `LocationVoitures.ServiceDefaults`
+- projet de tests `LocationVoitures.Tests` ajoute a la solution
 - depot Git initialise
 - application lancable avec Aspire
 
@@ -91,7 +98,7 @@ Fait :
 
 ### 5.3. Autres fonctionnalites
 
-Statut : `Partiellement fait`
+Statut : `Fait`
 
 Fait :
 

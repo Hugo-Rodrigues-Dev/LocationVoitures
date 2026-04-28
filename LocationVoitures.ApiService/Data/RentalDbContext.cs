@@ -16,5 +16,9 @@ public class RentalDbContext(DbContextOptions<RentalDbContext> options) : DbCont
         modelBuilder.Entity<Loueur>()
             .Property(loueur => loueur.Pays)
             .HasDefaultValue("France");
+
+        modelBuilder.Entity<Loueur>()
+            .Property(loueur => loueur.EstBlacklist)
+            .HasDefaultValue(false);
     }
 }

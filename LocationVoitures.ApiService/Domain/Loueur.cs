@@ -36,5 +36,8 @@ public class Loueur
     [Column("pays")]
     public string Pays { get; set; } = "France";
 
+    [Column("est_blacklist")]
+    public bool EstBlacklist { get; set; }
+
     public ICollection<Location> Locations { get; set; } = [];
 }
