@@ -1,4 +1,5 @@
-using LocationVoitures.ApiService.Features.Loueurs;
+using LocationVoitures.ApiService.Features.Loueurs.Requests;
+using LocationVoitures.ApiService.Features.Loueurs.Validators;
 
 namespace LocationVoitures.Tests.Features.Loueurs;
 

@@ -1,9 +1,8 @@
 using FluentValidation;
 using LocationVoitures.ApiService.Data;
-using LocationVoitures.ApiService.Features.Locations;
-using LocationVoitures.ApiService.Features.Loueurs;
-using LocationVoitures.ApiService.Features.OpenApi;
-using LocationVoitures.ApiService.Features.Voitures;
+using LocationVoitures.ApiService.Features.Locations.Endpoints;
+using LocationVoitures.ApiService.Features.Loueurs.Endpoints;
+using LocationVoitures.ApiService.Features.Voitures.Endpoints;
 using LocationVoitures.ApiService.Services;
 using Scalar.AspNetCore;
 

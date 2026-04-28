@@ -1,4 +1,5 @@
-using LocationVoitures.ApiService.Features.Locations;
+using LocationVoitures.ApiService.Features.Locations.Requests;
+using LocationVoitures.ApiService.Features.Locations.Validators;
 
 namespace LocationVoitures.Tests.Features.Locations;
 

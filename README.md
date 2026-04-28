@@ -144,11 +144,25 @@ Dossiers importants :
 
 Sous `Features`, l'API est rangee par fonctionnalite :
 
-- `Features/Voitures`
-- `Features/Locations`
-- `Features/Loueurs`
-- `Features/OpenApi`
-- `Features/Validation`
+- `Features/Voitures/Endpoints`
+- `Features/Voitures/Requests`
+- `Features/Voitures/Responses`
+- `Features/Voitures/Validators`
+- `Features/Voitures/Mappings`
+- `Features/Locations/Endpoints`
+- `Features/Locations/Requests`
+- `Features/Locations/Responses`
+- `Features/Locations/Validators`
+- `Features/Loueurs/Endpoints`
+- `Features/Loueurs/Requests`
+- `Features/Loueurs/Responses`
+- `Features/Loueurs/Validators`
+- `Features/Loueurs/Mappings`
+
+Les elements transverses ont ete deplaces dans :
+
+- `Common/OpenApi`
+- `Common/Validation`
 
 Cette organisation evite d'avoir tous les controllers d'un cote, tous les DTOs d'un autre, et rend chaque fonctionnalite autonome.
 
@@ -519,11 +533,11 @@ Cette partie a ete implementee proprement et reliee au reste de l'application.
 
 Ajouts dans `Features/Loueurs` :
 
-- `LoueurDto`
-- `CreateLoueurRequest`
-- `UpdateBlacklistLoueurRequest`
-- `CreateLoueurRequestValidator`
-- `LoueurMappings`
+- `Requests/CreateLoueurRequest`
+- `Requests/UpdateBlacklistLoueurRequest`
+- `Responses/LoueurDto`
+- `Validators/CreateLoueurRequestValidator`
+- `Mappings/LoueurMappings`
 
 ### 12.2. Endpoints Loueurs
 
@@ -598,11 +612,22 @@ En plus de Scalar pour la partie HTTP, `pgAdmin` permet de verifier la persistan
 
 - `Data`
 - `Domain`
-- `Features/Voitures`
-- `Features/Locations`
-- `Features/Loueurs`
-- `Features/OpenApi`
-- `Features/Validation`
+- `Features/Voitures/Endpoints`
+- `Features/Voitures/Requests`
+- `Features/Voitures/Responses`
+- `Features/Voitures/Validators`
+- `Features/Voitures/Mappings`
+- `Features/Locations/Endpoints`
+- `Features/Locations/Requests`
+- `Features/Locations/Responses`
+- `Features/Locations/Validators`
+- `Features/Loueurs/Endpoints`
+- `Features/Loueurs/Requests`
+- `Features/Loueurs/Responses`
+- `Features/Loueurs/Validators`
+- `Features/Loueurs/Mappings`
+- `Common/OpenApi`
+- `Common/Validation`
 - `Migrations`
 - `Services`
 
