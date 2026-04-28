@@ -1,6 +1,6 @@
 using LocationVoitures.ApiService.Services;
 
-namespace LocationVoitures.Tests;
+namespace LocationVoitures.Tests.Services;
 
 public class LocationServiceTests
 {
@@ -46,6 +46,17 @@ public class LocationServiceTests
     }
 
     [Test]
+    public void CalculerPrixTotal_ShouldHandleDecimalPrice()
+    {
+        var prix = _service.CalculerPrixTotal(
+            62.50m,
+            new DateOnly(2026, 6, 1),
+            new DateOnly(2026, 6, 2));
+
+        Assert.That(prix, Is.EqualTo(125m));
+    }
+
+    [Test]
     public void ValiderPeriode_ShouldThrow_WhenDateFinIsBeforeDateDebut()
     {
         var action = () => _service.ValiderPeriode(
@@ -56,10 +67,24 @@ public class LocationServiceTests
     }
 
     [Test]
+    public void ValiderPeriode_ShouldNotThrow_WhenDatesAreEqual()
+    {
+        Assert.DoesNotThrow(() => _service.ValiderPeriode(
+            new DateOnly(2026, 5, 10),
+            new DateOnly(2026, 5, 10)));
+    }
+
+    [Test]
     public void ValiderLoueurAutorise_ShouldThrow_WhenLoueurIsBlacklisted()
     {
         var action = () => _service.ValiderLoueurAutorise(true);
 
         Assert.Throws<InvalidOperationException>(() => action());
+    }
+
+    [Test]
+    public void ValiderLoueurAutorise_ShouldNotThrow_WhenLoueurIsNotBlacklisted()
+    {
+        Assert.DoesNotThrow(() => _service.ValiderLoueurAutorise(false));
     }
 }
