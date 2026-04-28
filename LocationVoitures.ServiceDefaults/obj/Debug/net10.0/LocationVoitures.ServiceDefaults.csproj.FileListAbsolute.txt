@@ -1,0 +1,12 @@
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/bin/Debug/net10.0/LocationVoitures.ServiceDefaults.deps.json
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/bin/Debug/net10.0/LocationVoitures.ServiceDefaults.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/bin/Debug/net10.0/LocationVoitures.ServiceDefaults.pdb
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/obj/Debug/net10.0/LocationVoitures.ServiceDefaults.csproj.AssemblyReference.cache
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/obj/Debug/net10.0/LocationVoitures.ServiceDefaults.GeneratedMSBuildEditorConfig.editorconfig
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/obj/Debug/net10.0/LocationVoitures.ServiceDefaults.AssemblyInfoInputs.cache
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/obj/Debug/net10.0/LocationVoitures.ServiceDefaults.AssemblyInfo.cs
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/obj/Debug/net10.0/LocationVoitures.ServiceDefaults.csproj.CoreCompileInputs.cache
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/obj/Debug/net10.0/LocationVoitures.ServiceDefaults.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/obj/Debug/net10.0/refint/LocationVoitures.ServiceDefaults.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/obj/Debug/net10.0/LocationVoitures.ServiceDefaults.pdb
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ServiceDefaults/obj/Debug/net10.0/ref/LocationVoitures.ServiceDefaults.dll
