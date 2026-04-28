@@ -1,5 +1,7 @@
 using LocationVoitures.ApiService.Data;
+using LocationVoitures.ApiService.Features.Locations;
 using LocationVoitures.ApiService.Features.Voitures;
+using LocationVoitures.ApiService.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,7 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 builder.AddNpgsqlDbContext<RentalDbContext>("RentalDb");
+builder.Services.AddScoped<LocationService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -38,6 +41,7 @@ await app.MigrateDatabaseAsync();
 app.MapGet("/", () => "Location Voitures API is running.");
 
 app.MapListVoitures();
+app.MapReserver();
 
 app.MapDefaultEndpoints();
 
