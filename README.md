@@ -9,6 +9,8 @@ Ce qui est expose dans l'API pour l'instant :
 
 - `GET /`
 - `GET /voitures`
+- `GET /voitures/{id}`
+- `GET /voitures/immatriculation/{immatriculation}`
 - `POST /locations`
 
 ## Avancement par partie
@@ -81,6 +83,16 @@ Fait :
 - creation d'une location en base ajoutee
 - endpoint mappe dans `Program.cs`
 
+### 5.3. Autres fonctionnalites
+
+Statut : `Partiellement fait`
+
+Fait :
+
+- endpoint `GET /voitures/{id}` cree
+- endpoint `GET /voitures/immatriculation/{immatriculation}` cree
+- les deux endpoints sont mappes dans `Program.cs`
+
 ### Dashboard Aspire
 
 Lancer :
@@ -114,4 +126,3 @@ OpenAPI :
 
 Traces :
 https://localhost:17030/traces
-

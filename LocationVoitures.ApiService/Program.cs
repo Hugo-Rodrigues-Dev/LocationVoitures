@@ -41,6 +41,8 @@ await app.MigrateDatabaseAsync();
 app.MapGet("/", () => "Location Voitures API is running.");
 
 app.MapListVoitures();
+app.MapGetVoitureById();
+app.MapGetVoitureByImmatriculation();
 app.MapReserver();
 
 app.MapDefaultEndpoints();
