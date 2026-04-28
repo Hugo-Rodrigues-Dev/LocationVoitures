@@ -6,12 +6,14 @@ public static class VoitureMappings
 {
     public static VoitureDto ToDto(this Voiture voiture, bool estDisponible)
     {
-        return new VoitureDto(
-            voiture.Immatriculation,
-            voiture.Marque,
-            voiture.Modele,
-            voiture.Categorie ?? string.Empty,
-            voiture.PrixLocationParJour,
-            estDisponible);
+        return new VoitureDto
+        {
+            Immatriculation = voiture.Immatriculation,
+            Marque = voiture.Marque,
+            Modele = voiture.Modele,
+            Categorie = voiture.Categorie ?? string.Empty,
+            PrixParJour = voiture.PrixLocationParJour,
+            EstDisponible = estDisponible
+        };
     }
 }

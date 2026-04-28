@@ -1,6 +1,7 @@
 using FluentValidation;
 using LocationVoitures.ApiService.Data;
 using LocationVoitures.ApiService.Domain;
+using LocationVoitures.ApiService.Features.OpenApi;
 using LocationVoitures.ApiService.Features.Validation;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,6 +41,13 @@ public static class CreateVoitureEndpoint
 
             return Results.Created($"/voitures/{voiture.Id}", voiture.ToDto(true));
         })
-        .WithName("CreateVoiture");
+        .WithName("CreateVoiture")
+        .WithTags(OpenApiDescriptions.VoituresTag)
+        .WithSummary("Cree une voiture")
+        .WithDescription("Ajoute une nouvelle voiture dans le catalogue. L'immatriculation doit etre unique.")
+        .Produces<VoitureDto>(StatusCodes.Status201Created)
+        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+        .Produces<string>(StatusCodes.Status409Conflict, "text/plain")
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }

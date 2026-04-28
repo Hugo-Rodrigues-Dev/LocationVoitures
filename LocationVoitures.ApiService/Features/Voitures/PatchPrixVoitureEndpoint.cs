@@ -1,5 +1,6 @@
 using FluentValidation;
 using LocationVoitures.ApiService.Data;
+using LocationVoitures.ApiService.Features.OpenApi;
 using LocationVoitures.ApiService.Features.Validation;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +29,13 @@ public static class PatchPrixVoitureEndpoint
 
             return Results.Ok(voiture.ToDto(true));
         })
-        .WithName("PatchPrixVoiture");
+        .WithName("PatchPrixVoiture")
+        .WithTags(OpenApiDescriptions.VoituresTag)
+        .WithSummary("Modifie le prix journalier d'une voiture")
+        .WithDescription("Met a jour uniquement le prix de location par jour d'une voiture.")
+        .Produces<VoitureDto>(StatusCodes.Status200OK)
+        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }

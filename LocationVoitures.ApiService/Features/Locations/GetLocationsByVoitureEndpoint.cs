@@ -1,4 +1,5 @@
 using LocationVoitures.ApiService.Data;
+using LocationVoitures.ApiService.Features.OpenApi;
 using Microsoft.EntityFrameworkCore;
 
 namespace LocationVoitures.ApiService.Features.Locations;
@@ -13,17 +14,24 @@ public static class GetLocationsByVoitureEndpoint
                 .Include(location => location.Voiture)
                 .Where(location => location.Voiture!.Immatriculation == immatriculation)
                 .OrderBy(location => location.DateDebut)
-                .Select(location => new LocationDto(
-                    location.Id,
-                    location.Voiture!.Immatriculation,
-                    location.LoueurId,
-                    location.DateDebut,
-                    location.DateFin,
-                    location.Annule))
+                .Select(location => new LocationDto
+                {
+                    Id = location.Id,
+                    Immatriculation = location.Voiture!.Immatriculation,
+                    LoueurId = location.LoueurId,
+                    DateDebut = location.DateDebut,
+                    DateFin = location.DateFin,
+                    Annule = location.Annule
+                })
                 .ToListAsync();
 
             return Results.Ok(locations);
         })
-        .WithName("GetLocationsByVoiture");
+        .WithName("GetLocationsByVoiture")
+        .WithTags(OpenApiDescriptions.LocationsTag)
+        .WithSummary("Liste les locations d'une voiture")
+        .WithDescription("Retourne toutes les reservations associees a une voiture, recherchee par immatriculation.")
+        .Produces<List<LocationDto>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }

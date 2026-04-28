@@ -1,4 +1,5 @@
 using LocationVoitures.ApiService.Data;
+using LocationVoitures.ApiService.Features.OpenApi;
 using Microsoft.EntityFrameworkCore;
 
 namespace LocationVoitures.ApiService.Features.Locations;
@@ -18,8 +19,18 @@ public static class AnnulerLocationEndpoint
             location.Annule = true;
             await db.SaveChangesAsync();
 
-            return Results.Ok(new { location.Id, location.Annule });
+            return Results.Ok(new AnnulationLocationResponse
+            {
+                Id = location.Id,
+                Annule = location.Annule
+            });
         })
-        .WithName("AnnulerLocation");
+        .WithName("AnnulerLocation")
+        .WithTags(OpenApiDescriptions.LocationsTag)
+        .WithSummary("Annule une location")
+        .WithDescription("Marque une location comme annulee a partir de son identifiant.")
+        .Produces<AnnulationLocationResponse>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }

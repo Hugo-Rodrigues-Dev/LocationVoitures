@@ -1,6 +1,7 @@
 using FluentValidation;
 using LocationVoitures.ApiService.Data;
 using LocationVoitures.ApiService.Domain;
+using LocationVoitures.ApiService.Features.OpenApi;
 using LocationVoitures.ApiService.Features.Validation;
 using LocationVoitures.ApiService.Services;
 using Microsoft.EntityFrameworkCore;
@@ -56,8 +57,21 @@ public static class ReserverEndpoint
             db.Locations.Add(nouvelleLocation);
             await db.SaveChangesAsync();
 
-            return Results.Ok(new ReserverResponse(nouvelleLocation.Id, prix, "Reservation confirmee"));
+            return Results.Ok(new ReserverResponse
+            {
+                IdLocation = nouvelleLocation.Id,
+                PrixTotal = prix,
+                Message = "Reservation confirmee"
+            });
         })
-        .WithName("CreerLocation");
+        .WithName("CreerLocation")
+        .WithTags(OpenApiDescriptions.LocationsTag)
+        .WithSummary("Cree une reservation")
+        .WithDescription("Verifie les regles metier puis cree une location si la voiture et le loueur existent et si la periode est disponible.")
+        .Produces<ReserverResponse>(StatusCodes.Status200OK)
+        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+        .Produces<string>(StatusCodes.Status404NotFound, "text/plain")
+        .Produces<string>(StatusCodes.Status409Conflict, "text/plain")
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }
