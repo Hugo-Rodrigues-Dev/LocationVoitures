@@ -11,6 +11,9 @@ Ce qui est expose dans l'API pour l'instant :
 - `GET /voitures`
 - `GET /voitures/{id}`
 - `GET /voitures/immatriculation/{immatriculation}`
+- `POST /voitures`
+- `PUT /voitures/{id}`
+- `PATCH /voitures/{id}/prix`
 - `POST /locations`
 
 ## Avancement par partie
@@ -91,7 +94,10 @@ Fait :
 
 - endpoint `GET /voitures/{id}` cree
 - endpoint `GET /voitures/immatriculation/{immatriculation}` cree
-- les deux endpoints sont mappes dans `Program.cs`
+- endpoint `POST /voitures` cree
+- endpoint `PUT /voitures/{id}` cree
+- endpoint `PATCH /voitures/{id}/prix` cree
+- les endpoints sont mappes dans `Program.cs`
 
 ### Dashboard Aspire
 

@@ -43,6 +43,9 @@ app.MapGet("/", () => "Location Voitures API is running.");
 app.MapListVoitures();
 app.MapGetVoitureById();
 app.MapGetVoitureByImmatriculation();
+app.MapCreateVoiture();
+app.MapUpdateVoiture();
+app.MapPatchPrixVoiture();
 app.MapReserver();
 
 app.MapDefaultEndpoints();
