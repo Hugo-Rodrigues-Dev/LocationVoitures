@@ -47,6 +47,9 @@ app.MapCreateVoiture();
 app.MapUpdateVoiture();
 app.MapPatchPrixVoiture();
 app.MapReserver();
+app.MapListLocations();
+app.MapGetLocationsByVoiture();
+app.MapAnnulerLocation();
 
 app.MapDefaultEndpoints();
 
