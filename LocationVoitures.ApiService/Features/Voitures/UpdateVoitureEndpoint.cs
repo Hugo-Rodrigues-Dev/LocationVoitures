@@ -1,4 +1,6 @@
+using FluentValidation;
 using LocationVoitures.ApiService.Data;
+using LocationVoitures.ApiService.Features.Validation;
 using Microsoft.EntityFrameworkCore;
 
 namespace LocationVoitures.ApiService.Features.Voitures;
@@ -7,7 +9,7 @@ public static class UpdateVoitureEndpoint
 {
     public static void MapUpdateVoiture(this IEndpointRouteBuilder app)
     {
-        app.MapPut("/voitures/{id:int}", async (int id, CreateVoitureRequest request, RentalDbContext db) =>
+        app.MapPut("/voitures/{id:int}", async (int id, CreateVoitureRequest request, IValidator<CreateVoitureRequest> validator, RentalDbContext db) =>
         {
             var voiture = await db.Voitures.FirstOrDefaultAsync(v => v.Id == id);
             if (voiture is null)
@@ -15,10 +17,10 @@ public static class UpdateVoitureEndpoint
                 return Results.NotFound();
             }
 
-            var validation = CreateVoitureEndpoint.ValidateVoitureRequest(request);
-            if (validation is not null)
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
             {
-                return validation;
+                return validation.ToValidationProblem();
             }
 
             var immatriculationExiste = await db.Voitures

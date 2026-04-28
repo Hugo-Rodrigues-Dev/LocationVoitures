@@ -1,4 +1,6 @@
+using FluentValidation;
 using LocationVoitures.ApiService.Data;
+using LocationVoitures.ApiService.Features.Validation;
 using Microsoft.EntityFrameworkCore;
 
 namespace LocationVoitures.ApiService.Features.Voitures;
@@ -7,14 +9,12 @@ public static class PatchPrixVoitureEndpoint
 {
     public static void MapPatchPrixVoiture(this IEndpointRouteBuilder app)
     {
-        app.MapPatch("/voitures/{id:int}/prix", async (int id, UpdatePrixVoitureRequest request, RentalDbContext db) =>
+        app.MapPatch("/voitures/{id:int}/prix", async (int id, UpdatePrixVoitureRequest request, IValidator<UpdatePrixVoitureRequest> validator, RentalDbContext db) =>
         {
-            if (request.PrixLocationParJour <= 0)
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
             {
-                return Results.ValidationProblem(new Dictionary<string, string[]>
-                {
-                    ["PrixLocationParJour"] = ["Le prix doit etre strictement positif."]
-                });
+                return validation.ToValidationProblem();
             }
 
             var voiture = await db.Voitures.FirstOrDefaultAsync(v => v.Id == id);

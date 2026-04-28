@@ -1,5 +1,7 @@
+using FluentValidation;
 using LocationVoitures.ApiService.Data;
 using LocationVoitures.ApiService.Domain;
+using LocationVoitures.ApiService.Features.Validation;
 using LocationVoitures.ApiService.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,34 +11,12 @@ public static class ReserverEndpoint
 {
     public static void MapReserver(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/locations", async (ReserverRequest request, RentalDbContext db, LocationService service) =>
+        app.MapPost("/locations", async (ReserverRequest request, IValidator<ReserverRequest> validator, RentalDbContext db, LocationService service) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Immatriculation))
+            var validation = await validator.ValidateAsync(request);
+            if (!validation.IsValid)
             {
-                return Results.ValidationProblem(new Dictionary<string, string[]>
-                {
-                    ["Immatriculation"] = ["L'immatriculation est obligatoire."]
-                });
-            }
-
-            if (request.LoueurId <= 0)
-            {
-                return Results.ValidationProblem(new Dictionary<string, string[]>
-                {
-                    ["LoueurId"] = ["Le LoueurId doit etre strictement positif."]
-                });
-            }
-
-            try
-            {
-                service.ValiderPeriode(request.DateDebut, request.DateFin);
-            }
-            catch (ArgumentException exception)
-            {
-                return Results.ValidationProblem(new Dictionary<string, string[]>
-                {
-                    ["Dates"] = [exception.Message]
-                });
+                return validation.ToValidationProblem();
             }
 
             var voiture = await db.Voitures.FirstOrDefaultAsync(v => v.Immatriculation == request.Immatriculation);

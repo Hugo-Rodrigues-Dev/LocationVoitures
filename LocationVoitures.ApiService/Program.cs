@@ -1,3 +1,4 @@
+using FluentValidation;
 using LocationVoitures.ApiService.Data;
 using LocationVoitures.ApiService.Features.Locations;
 using LocationVoitures.ApiService.Features.Voitures;
@@ -13,6 +14,7 @@ builder.AddServiceDefaults();
 builder.Services.AddProblemDetails();
 builder.AddNpgsqlDbContext<RentalDbContext>("RentalDb");
 builder.Services.AddScoped<LocationService>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
