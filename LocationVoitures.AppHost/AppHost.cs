@@ -3,7 +3,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 var postgres = builder.AddPostgres("postgres")
     .WithPgAdmin(pgAdmin =>
     {
-        pgAdmin.WithEnvironment("PGADMIN_DEFAULT_EMAIL", "admin@locationvoitures.local");
+        pgAdmin.WithEnvironment("PGADMIN_DEFAULT_EMAIL", "admin@locationvoitures.fr");
         pgAdmin.WithEnvironment("PGADMIN_DEFAULT_PASSWORD", "Admin123!");
     });
 

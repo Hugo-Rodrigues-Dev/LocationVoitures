@@ -208,7 +208,7 @@ Dans `LocationVoitures.AppHost/AppHost.cs`, PostgreSQL est declare comme ressour
 var postgres = builder.AddPostgres("postgres")
     .WithPgAdmin(pgAdmin =>
     {
-        pgAdmin.WithEnvironment("PGADMIN_DEFAULT_EMAIL", "admin@locationvoitures.local");
+        pgAdmin.WithEnvironment("PGADMIN_DEFAULT_EMAIL", "admin@locationvoitures.fr");
         pgAdmin.WithEnvironment("PGADMIN_DEFAULT_PASSWORD", "Admin123!");
     });
 var rentalDb = postgres.AddDatabase("RentalDb");
@@ -295,8 +295,10 @@ dotnet run --project LocationVoitures.AppHost
 
 4. se connecter avec :
 
-- email : `admin@locationvoitures.local`
+- email : `admin@locationvoitures.fr`
 - mot de passe : `Admin123!`
+
+L'URL de `pgAdmin` n'est pas fixe. Elle est allouee dynamiquement par Aspire et s'affiche dans la colonne `URL` de la ressource `pgadmin` dans le dashboard.
 
 #### Connexion au serveur PostgreSQL
 
@@ -643,6 +645,6 @@ dotnet run --project LocationVoitures.ApiService
 4. se connecter avec :
 
 ```text
-admin@locationvoitures.local
+admin@locationvoitures.fr
 Admin123!
 ```
