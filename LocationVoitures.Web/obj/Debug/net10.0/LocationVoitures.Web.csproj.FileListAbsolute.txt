@@ -107,3 +107,4 @@
 /mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.Web/obj/Debug/net10.0/LocationVoitures.Web.pdb
 /mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.Web/obj/Debug/net10.0/LocationVoitures.Web.genruntimeconfig.cache
 /mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.Web/obj/Debug/net10.0/ref/LocationVoitures.Web.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.Web/obj/Debug/net10.0/LocationVoitures.Web.sourcelink.json

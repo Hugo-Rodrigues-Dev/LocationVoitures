@@ -149,3 +149,6 @@
 /mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ApiService/bin/Debug/net10.0/tr/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 /mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ApiService/bin/Debug/net10.0/zh-Hans/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 /mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ApiService/bin/Debug/net10.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ApiService/bin/Debug/net10.0/FluentValidation.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ApiService/bin/Debug/net10.0/FluentValidation.DependencyInjectionExtensions.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ApiService/obj/Debug/net10.0/LocationVoitures.ApiService.sourcelink.json

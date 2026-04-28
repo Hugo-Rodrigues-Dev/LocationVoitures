@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "XefG3K3LfaE=",
+  "dgSpecHash": "MLMa6/Ow1y0=",
   "success": true,
   "projectFilePath": "/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.AppHost/LocationVoitures.AppHost.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,8 @@
     "/home/hugo/.nuget/packages/aspire.hosting/13.2.4/aspire.hosting.13.2.4.nupkg.sha512",
     "/home/hugo/.nuget/packages/aspire.hosting.apphost/13.2.4/aspire.hosting.apphost.13.2.4.nupkg.sha512",
     "/home/hugo/.nuget/packages/aspire.hosting.orchestration.linux-x64/13.2.4/aspire.hosting.orchestration.linux-x64.13.2.4.nupkg.sha512",
+    "/home/hugo/.nuget/packages/aspire.hosting.postgresql/13.2.4/aspire.hosting.postgresql.13.2.4.nupkg.sha512",
+    "/home/hugo/.nuget/packages/aspnetcore.healthchecks.npgsql/9.0.0/aspnetcore.healthchecks.npgsql.9.0.0.nupkg.sha512",
     "/home/hugo/.nuget/packages/aspnetcore.healthchecks.uris/9.0.0/aspnetcore.healthchecks.uris.9.0.0.nupkg.sha512",
     "/home/hugo/.nuget/packages/fractions/7.3.0/fractions.7.3.0.nupkg.sha512",
     "/home/hugo/.nuget/packages/google.protobuf/3.33.5/google.protobuf.3.33.5.nupkg.sha512",
@@ -65,6 +67,7 @@
     "/home/hugo/.nuget/packages/modelcontextprotocol.core/1.0.0/modelcontextprotocol.core.1.0.0.nupkg.sha512",
     "/home/hugo/.nuget/packages/nerdbank.streams/2.12.87/nerdbank.streams.2.12.87.nupkg.sha512",
     "/home/hugo/.nuget/packages/newtonsoft.json/13.0.4/newtonsoft.json.13.0.4.nupkg.sha512",
+    "/home/hugo/.nuget/packages/npgsql/8.0.3/npgsql.8.0.3.nupkg.sha512",
     "/home/hugo/.nuget/packages/polly.core/8.6.5/polly.core.8.6.5.nupkg.sha512",
     "/home/hugo/.nuget/packages/semver/3.0.0/semver.3.0.0.nupkg.sha512",
     "/home/hugo/.nuget/packages/streamjsonrpc/2.22.23/streamjsonrpc.2.22.23.nupkg.sha512",

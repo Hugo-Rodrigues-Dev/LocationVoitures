@@ -101,3 +101,7 @@
 /mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.AppHost/obj/Debug/net10.0/LocationVoitures.AppHost.pdb
 /mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.AppHost/obj/Debug/net10.0/LocationVoitures.AppHost.genruntimeconfig.cache
 /mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.AppHost/obj/Debug/net10.0/ref/LocationVoitures.AppHost.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.AppHost/bin/Debug/net10.0/Aspire.Hosting.PostgreSQL.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.AppHost/bin/Debug/net10.0/HealthChecks.NpgSql.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.AppHost/bin/Debug/net10.0/Npgsql.dll
+/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.AppHost/obj/Debug/net10.0/LocationVoitures.AppHost.sourcelink.json

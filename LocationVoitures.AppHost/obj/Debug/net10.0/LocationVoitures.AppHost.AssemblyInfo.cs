@@ -23,7 +23,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LocationVoitures.AppHost")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5a8eab83ff0b2bf3944e7962a7c6b76d0004fd14")]
 [assembly: System.Reflection.AssemblyProductAttribute("LocationVoitures.AppHost")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LocationVoitures.AppHost")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -17,6 +17,7 @@ Le projet final contient :
 - `LocationVoitures.Web` : front fourni par le template Aspire
 - `LocationVoitures.ServiceDefaults` : configuration partagée Aspire
 - `LocationVoitures.Tests` : projet de tests NUnit
+- `pgAdmin` : interface web d'administration PostgreSQL exposee par Aspire
 
 ---
 
@@ -114,6 +115,8 @@ URLs utiles :
 - Scalar : `https://localhost:7491/scalar/v1`
 - OpenAPI : `https://localhost:7491/openapi/v1.json`
 
+En plus, `pgAdmin` apparait dans le dashboard Aspire avec une URL HTTP dediee.
+
 ### Point important sur WSL / proxy
 
 Le dashboard Aspire a pose probleme a cause d'un proxy global.  
@@ -202,9 +205,19 @@ Il expose :
 Dans `LocationVoitures.AppHost/AppHost.cs`, PostgreSQL est declare comme ressource Aspire :
 
 ```csharp
-var postgres = builder.AddPostgres("postgres");
+var postgres = builder.AddPostgres("postgres")
+    .WithPgAdmin(pgAdmin =>
+    {
+        pgAdmin.WithEnvironment("PGADMIN_DEFAULT_EMAIL", "admin@locationvoitures.local");
+        pgAdmin.WithEnvironment("PGADMIN_DEFAULT_PASSWORD", "Admin123!");
+    });
 var rentalDb = postgres.AddDatabase("RentalDb");
 ```
+
+Cette configuration a deux effets :
+
+- Aspire demarre PostgreSQL dans un conteneur
+- Aspire demarre aussi `pgAdmin` pour visualiser les donnees de la base
 
 L'API reference ensuite cette base :
 
@@ -261,6 +274,64 @@ Cela permet de tester tout de suite :
 - la disponibilite
 - les reservations
 - les annulations
+
+### 6.9. Visualisation avec pgAdmin
+
+`pgAdmin` permet de verifier visuellement les tables, les colonnes et les donnees seedees sans requete SQL manuelle.
+
+#### Acces
+
+1. lancer l'orchestrateur :
+
+```bash
+dotnet run --project LocationVoitures.AppHost
+```
+
+2. ouvrir le dashboard Aspire :
+
+- `https://localhost:17030`
+
+3. dans `Resources`, cliquer sur la ligne `pgadmin`
+
+4. se connecter avec :
+
+- email : `admin@locationvoitures.local`
+- mot de passe : `Admin123!`
+
+#### Connexion au serveur PostgreSQL
+
+Une fois dans `pgAdmin`, ajouter un serveur si besoin avec les informations visibles dans Aspire :
+
+- Host : `postgres`
+- Port : `5432`
+- Username : `postgres`
+- Password : mot de passe genere par Aspire pour la ressource PostgreSQL
+
+Dans la pratique, le plus simple est de recuperer les informations exactes depuis le dashboard Aspire dans la ressource `postgres`.
+
+#### Donnees a verifier
+
+Une fois connecte, on peut parcourir :
+
+- `Databases`
+- `RentalDb`
+- `Schemas`
+- `public`
+- `Tables`
+
+Puis verifier en particulier :
+
+- `loueur`
+- `voiture`
+- `location`
+
+On doit retrouver :
+
+- les loueurs seedes
+- les voitures seedees
+- les locations seedees
+- l'etat `annule`
+- l'etat `est_blacklist`
 
 ---
 
@@ -513,6 +584,10 @@ OpenAPI brut :
 
 - `https://localhost:7491/openapi/v1.json`
 
+### Outil complementaire
+
+En plus de Scalar pour la partie HTTP, `pgAdmin` permet de verifier la persistance reelle des donnees en base.
+
 ---
 
 ## 14. Structure finale du code
@@ -548,14 +623,26 @@ Le projet a ete structure pour qu'un developpeur puisse :
 dotnet run --project LocationVoitures.AppHost
 ```
 
+### Lancer les tests
+
+```bash
+dotnet test LocationVoitures.Tests/LocationVoitures.Tests.csproj
+```
+
 ### Lancer uniquement l'API
 
 ```bash
 dotnet run --project LocationVoitures.ApiService
 ```
 
-### Lancer les tests
+### Ouvrir pgAdmin
 
-```bash
-dotnet test LocationVoitures.Tests/LocationVoitures.Tests.csproj
+1. lancer `LocationVoitures.AppHost`
+2. ouvrir le dashboard Aspire
+3. cliquer sur la ressource `pgadmin`
+4. se connecter avec :
+
+```text
+admin@locationvoitures.local
+Admin123!
 ```

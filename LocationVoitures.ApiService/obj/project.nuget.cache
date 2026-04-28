@@ -1,10 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "snWeRlnFZbY=",
+  "dgSpecHash": "V9E8VyT5pJ4=",
   "success": true,
   "projectFilePath": "/mnt/c/Users/rodri/Documents/CPE/S8/ASINET/Projet/LocationVoitures.ApiService/LocationVoitures.ApiService.csproj",
   "expectedPackageFiles": [
     "/home/hugo/.nuget/packages/aspire.npgsql.entityframeworkcore.postgresql/13.2.4/aspire.npgsql.entityframeworkcore.postgresql.13.2.4.nupkg.sha512",
+    "/home/hugo/.nuget/packages/fluentvalidation/12.1.1/fluentvalidation.12.1.1.nupkg.sha512",
+    "/home/hugo/.nuget/packages/fluentvalidation.dependencyinjectionextensions/12.1.1/fluentvalidation.dependencyinjectionextensions.12.1.1.nupkg.sha512",
     "/home/hugo/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/home/hugo/.nuget/packages/microsoft.aspnetcore.openapi/10.0.5/microsoft.aspnetcore.openapi.10.0.5.nupkg.sha512",
     "/home/hugo/.nuget/packages/microsoft.build.framework/18.0.2/microsoft.build.framework.18.0.2.nupkg.sha512",
