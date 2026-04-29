@@ -1,0 +1,96 @@
+@using LocationVoitures.Web.Features.Locations.Models
+@using LocationVoitures.Web.Features.Locations.Services
+@using LocationVoitures.Web.Features.Loueurs.Models
+@using LocationVoitures.Web.Services
+
+@inject LocationsApiClient LocationsApi
+@inject UserNotificationService Notifications
+
+<EditForm Model="request" OnValidSubmit="HandleSubmitAsync" FormName="reservation-form">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="validation-summary-errors mb-3" />
+
+    <div class="row g-3">
+        <div class="col-12">
+            <label class="form-label" for="voiture">Voiture selectionnee</label>
+            <input id="voiture" class="form-control" value="@Immatriculation" readonly />
+        </div>
+
+        <div class="col-12">
+            <label class="form-label" for="loueur">Loueur</label>
+            <InputSelect id="loueur" class="form-select" @bind-Value="request.LoueurId">
+                <option value="0">Choisir un loueur</option>
+                @foreach (var loueur in Loueurs.OrderBy(item => item.Nom).ThenBy(item => item.Prenom))
+                {
+                    <option value="@loueur.Id" disabled="@loueur.EstBlacklist">
+                        @($"{loueur.Nom} {loueur.Prenom} - {loueur.Mobile}{(loueur.EstBlacklist ? " (blackliste)" : string.Empty)}")
+                    </option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="dateDebut">Date de debut</label>
+            <InputDate id="dateDebut" class="form-control" @bind-Value="request.DateDebut" />
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="dateFin">Date de fin</label>
+            <InputDate id="dateFin" class="form-control" @bind-Value="request.DateFin" />
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mt-4">
+        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+            @(isSubmitting ? "Reservation en cours..." : "Confirmer la reservation")
+        </button>
+        <button type="button" class="btn btn-outline-secondary" @onclick="ResetDates">Reinitialiser les dates</button>
+    </div>
+</EditForm>
+
+@code {
+    private readonly ReserverRequest request = new();
+    private bool isSubmitting;
+
+    [Parameter]
+    public string Immatriculation { get; set; } = string.Empty;
+
+    [Parameter]
+    public IReadOnlyList<LoueurDto> Loueurs { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<ReserverResponse> OnReservationCreated { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        request.Immatriculation = Immatriculation;
+    }
+
+    private async Task HandleSubmitAsync()
+    {
+        isSubmitting = true;
+
+        try
+        {
+            request.Immatriculation = Immatriculation;
+            var response = await LocationsApi.CreateAsync(request);
+            await OnReservationCreated.InvokeAsync(response);
+            Notifications.ShowSuccess("Reservation confirmee",
+                $"{response.Message} Prix total : {response.PrixTotal:0.00} EUR.");
+        }
+        catch (Exception ex)
+        {
+            Notifications.ShowException(ex, "Reservation impossible");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void ResetDates()
+    {
+        request.DateDebut = DateOnly.FromDateTime(DateTime.Today);
+        request.DateFin = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+    }
+}

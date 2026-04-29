@@ -1,5 +1,8 @@
-using LocationVoitures.Web;
 using LocationVoitures.Web.Components;
+using LocationVoitures.Web.Features.Locations.Services;
+using LocationVoitures.Web.Features.Loueurs.Services;
+using LocationVoitures.Web.Features.Voitures.Services;
+using LocationVoitures.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,12 +14,23 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddOutputCache();
+builder.Services.AddScoped<UserNotificationService>();
 
-builder.Services.AddHttpClient<WeatherApiClient>(client =>
+builder.Services.AddHttpClient<VoituresApiClient>(client =>
     {
         // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
         // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-        client.BaseAddress = new("https+http://apiservice");
+        client.BaseAddress = new("https+http://gateway");
+    });
+
+builder.Services.AddHttpClient<LocationsApiClient>(client =>
+    {
+        client.BaseAddress = new("https+http://gateway");
+    });
+
+builder.Services.AddHttpClient<LoueursApiClient>(client =>
+    {
+        client.BaseAddress = new("https+http://gateway");
     });
 
 var app = builder.Build();

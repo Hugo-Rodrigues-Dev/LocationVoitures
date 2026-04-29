@@ -23,7 +23,7 @@ var gateway = builder.AddProject<Projects.LocationVoitures_Gateway>("gateway")
 builder.AddProject<Projects.LocationVoitures_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
-    .WithReference(apiService)
-    .WaitFor(apiService);
+    .WithReference(gateway)
+    .WaitFor(gateway);
 
 builder.Build().Run();

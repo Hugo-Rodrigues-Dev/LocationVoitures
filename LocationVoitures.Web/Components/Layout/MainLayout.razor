@@ -7,7 +7,14 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <div class="layout-heading">
+                <strong>LocationVoitures</strong>
+            </div>
+
+            <nav class="layout-links" aria-label="Liens rapides">
+                <a href="/">Accueil</a>
+                <a href="/catalogue">Catalogue</a>
+            </nav>
         </div>
 
         <article class="content px-4">
@@ -15,6 +22,8 @@
         </article>
     </main>
 </div>
+
+<AppNotification />
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.

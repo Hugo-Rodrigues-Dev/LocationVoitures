@@ -1,0 +1,194 @@
+@page "/catalogue"
+@attribute [StreamRendering(true)]
+@attribute [OutputCache(Duration = 5)]
+
+@using Microsoft.AspNetCore.OutputCaching
+@using LocationVoitures.Web.Features.Voitures.Components
+@using LocationVoitures.Web.Features.Voitures.Models
+@using LocationVoitures.Web.Features.Voitures.Services
+@using LocationVoitures.Web.Services
+
+@inject VoituresApiClient VoituresApi
+@inject NavigationManager Navigation
+@inject UserNotificationService Notifications
+
+<PageTitle>Catalogue</PageTitle>
+
+<section class="page-section">
+    <div class="page-header">
+        <span class="eyebrow">Catalogue</span>
+        <h1>Trouver la bonne voiture avant de reserver</h1>
+        <p class="lead">
+            Le catalogue passe par la gateway YARP. Il permet de filtrer les voitures, de verifier leur disponibilite
+            du jour et d'ouvrir une fiche detaillee pour consulter les locations associees.
+        </p>
+    </div>
+
+    <div class="row g-4 align-items-stretch mb-4">
+        <div class="col-12 col-lg-7">
+            <section class="panel h-100">
+                <h2>Filtrer le catalogue</h2>
+                <form class="row g-3" @onsubmit="ApplyCategoryFilterAsync" @onsubmit:preventDefault>
+                    <div class="col-12 col-md-8">
+                        <label class="form-label" for="categorie">Categorie</label>
+                        <select id="categorie" class="form-select" @bind="selectedCategorie">
+                            <option value="">Toutes les categories</option>
+                            @foreach (var categorie in categories)
+                            {
+                                <option value="@categorie">@categorie</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
+                            Actualiser
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <section class="panel h-100">
+                <h2>Recherche par immatriculation</h2>
+                <form class="row g-3" @onsubmit="SearchByImmatriculationAsync" @onsubmit:preventDefault>
+                    <div class="col-12">
+                        <label class="form-label" for="immat">Immatriculation</label>
+                        <input id="immat" class="form-control" @bind="searchImmatriculation" placeholder="AA-123-BB" />
+                    </div>
+
+                    <div class="col-12 d-flex gap-2">
+                        <button type="submit" class="btn btn-outline-primary">Ouvrir la fiche</button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="ResetSearch">Reinitialiser</button>
+                    </div>
+                </form>
+
+            </section>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <div class="alert alert-danger" role="alert">@loadError</div>
+    }
+    else if (isLoading)
+    {
+        <p><em>Chargement du catalogue...</em></p>
+    }
+    else if (voitures.Count == 0)
+    {
+        <div class="alert alert-warning" role="alert">
+            Aucune voiture ne correspond au filtre actif.
+        </div>
+    }
+    else
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <article class="metric-card">
+                    <span class="metric-label">Voitures chargees</span>
+                    <strong class="metric-value">@voitures.Count</strong>
+                </article>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <article class="metric-card">
+                    <span class="metric-label">Disponibles aujourd'hui</span>
+                    <strong class="metric-value">@voitures.Count(voiture => voiture.EstDisponible)</strong>
+                </article>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <article class="metric-card">
+                    <span class="metric-label">Filtre actif</span>
+                    <strong class="metric-value metric-value--small">@(string.IsNullOrWhiteSpace(selectedCategorie) ? "Toutes" : selectedCategorie)</strong>
+                </article>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var voiture in voitures)
+            {
+                <div class="col-12 col-md-6 col-xl-4">
+                    <VoitureCard Voiture="voiture" />
+                </div>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private IReadOnlyList<VoitureDto> voitures = [];
+    private List<string> categories = [];
+    private string selectedCategorie = string.Empty;
+    private string searchImmatriculation = string.Empty;
+    private string? loadError;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategoriesAsync();
+        await LoadCatalogueAsync();
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        var catalogueComplet = await VoituresApi.GetCatalogueAsync();
+        categories = catalogueComplet
+            .Select(voiture => voiture.Categorie)
+            .Where(categorie => !string.IsNullOrWhiteSpace(categorie))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(categorie => categorie)
+            .ToList();
+    }
+
+    private async Task LoadCatalogueAsync()
+    {
+        isLoading = true;
+        loadError = null;
+
+        try
+        {
+            voitures = await VoituresApi.GetCatalogueAsync(selectedCategorie);
+        }
+        catch (Exception ex)
+        {
+            loadError = "Impossible de charger le catalogue pour le moment.";
+            Notifications.ShowException(ex, "Catalogue indisponible");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ApplyCategoryFilterAsync()
+    {
+        await LoadCatalogueAsync();
+    }
+
+    private async Task SearchByImmatriculationAsync()
+    {
+        if (string.IsNullOrWhiteSpace(searchImmatriculation))
+        {
+            Notifications.ShowWarning("Recherche incomplete", "Saisissez une immatriculation au format AA-123-BB.");
+            return;
+        }
+
+        try
+        {
+            var voiture = await VoituresApi.GetByImmatriculationAsync(searchImmatriculation.Trim());
+            Navigation.NavigateTo($"/catalogue/{Uri.EscapeDataString(voiture.Immatriculation)}");
+        }
+        catch (Exception ex)
+        {
+            Notifications.ShowException(ex, "Recherche impossible");
+        }
+    }
+
+    private void ResetSearch()
+    {
+        searchImmatriculation = string.Empty;
+    }
+}

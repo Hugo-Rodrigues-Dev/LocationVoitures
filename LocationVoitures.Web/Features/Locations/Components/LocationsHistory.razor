@@ -1,0 +1,76 @@
+@using LocationVoitures.Web.Features.Locations.Models
+
+@if (Locations.Count == 0)
+{
+    <div class="empty-state">
+        <h3>Aucune location enregistree</h3>
+        <p>Cette voiture n'a pas encore d'historique de reservation dans l'application.</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Periode</th>
+                    <th scope="col">Loueur</th>
+                    <th scope="col">Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var location in Locations.OrderByDescending(item => item.DateDebut))
+                {
+                    <tr>
+                        <td>
+                            <strong>@location.DateDebut.ToString("dd/MM/yyyy")</strong>
+                            <div class="text-muted small">au @location.DateFin.ToString("dd/MM/yyyy")</div>
+                        </td>
+                        <td>#@location.LoueurId</td>
+                        <td>
+                            <span class="@GetStatusClass(location)">@GetStatusLabel(location)</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public IReadOnlyList<LocationDto> Locations { get; set; } = [];
+
+    private static string GetStatusLabel(LocationDto location)
+    {
+        if (location.Annule)
+        {
+            return "Annulee";
+        }
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (location.DateDebut > today)
+        {
+            return "A venir";
+        }
+
+        if (location.DateFin < today)
+        {
+            return "Terminee";
+        }
+
+        return "En cours";
+    }
+
+    private static string GetStatusClass(LocationDto location)
+    {
+        return GetStatusLabel(location) switch
+        {
+            "Annulee" => "badge text-bg-secondary",
+            "A venir" => "badge text-bg-info",
+            "Terminee" => "badge text-bg-light",
+            _ => "badge text-bg-success"
+        };
+    }
+}

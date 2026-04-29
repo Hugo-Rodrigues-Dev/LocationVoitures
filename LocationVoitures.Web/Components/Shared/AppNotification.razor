@@ -1,0 +1,48 @@
+@implements IDisposable
+
+@inject UserNotificationService Notifications
+
+@if (Notifications.Current is not null)
+{
+    <div class="notification-overlay" @onclick="Dismiss">
+        <section class="notification-dialog notification-dialog--@Notifications.Current.Severity.ToString().ToLowerInvariant()"
+                 role="alertdialog"
+                 aria-live="assertive"
+                 aria-labelledby="notification-title"
+                 aria-describedby="notification-message"
+                 @onclick:stopPropagation>
+            <div class="notification-header">
+                <h2 id="notification-title">@Notifications.Current.Title</h2>
+                <button type="button" class="notification-close" @onclick="Dismiss" aria-label="Fermer la notification">×</button>
+            </div>
+
+            <p id="notification-message">@Notifications.Current.Message</p>
+
+            <div class="notification-actions">
+                <button type="button" class="btn btn-primary" @onclick="Dismiss">Compris</button>
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        Notifications.OnChange += HandleNotificationChanged;
+    }
+
+    private void HandleNotificationChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void Dismiss()
+    {
+        Notifications.Dismiss();
+    }
+
+    public void Dispose()
+    {
+        Notifications.OnChange -= HandleNotificationChanged;
+    }
+}

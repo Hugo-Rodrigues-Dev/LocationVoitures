@@ -1,7 +1,47 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Accueil</PageTitle>
 
-<h1>Hello, world!</h1>
+<section class="page-section">
+    <div class="page-header">
+        <span class="eyebrow">Frontend TP1 partie 2</span>
+        <h1>Explorer le catalogue et reserver une voiture</h1>
+        <p class="lead">
+            Cette application Blazor consomme la gateway YARP puis l'API de location. Le parcours utilisateur
+            attendu avant le paiement est deja couvert : consulter le catalogue, rechercher une voiture, voir ses
+            locations et creer une reservation.
+        </p>
+    </div>
 
-Welcome to your new app.
+    <div class="row g-4">
+        <div class="col-12 col-lg-4">
+            <article class="panel h-100">
+                <h2>1. Parcourir le catalogue</h2>
+                <p>
+                    Affiche les voitures disponibles, avec un filtre par categorie et un acces direct a la fiche detaillee.
+                </p>
+                <a class="btn btn-primary" href="/catalogue">Ouvrir le catalogue</a>
+            </article>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <article class="panel h-100">
+                <h2>2. Rechercher par immatriculation</h2>
+                <p>
+                    Une recherche exacte redirige vers la voiture choisie pour consulter son historique de location.
+                </p>
+                <a class="btn btn-outline-primary" href="/catalogue">Tester la recherche</a>
+            </article>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <article class="panel h-100">
+                <h2>3. Reserver sans paiement</h2>
+                <p>
+                    Le formulaire de reservation interroge directement l'API via la gateway et affiche les erreurs metier.
+                </p>
+                <a class="btn btn-outline-primary" href="/catalogue">Acceder au parcours</a>
+            </article>
+        </div>
+    </div>
+</section>

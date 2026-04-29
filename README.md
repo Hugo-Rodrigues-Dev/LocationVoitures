@@ -119,8 +119,7 @@ En plus, `pgAdmin` apparait dans le dashboard Aspire avec une URL HTTP dediee.
 
 ### Point important sur WSL / proxy
 
-Le dashboard Aspire a pose probleme a cause d'un proxy global.  
-La correction a ete faite dans `LocationVoitures.AppHost/Properties/launchSettings.json` avec :
+Le dashboard Aspire a pose probleme a cause d'un proxy global.La correction a ete faite dans `LocationVoitures.AppHost/Properties/launchSettings.json` avec :
 
 - `ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true`
 - `NO_PROXY=localhost,127.0.0.1,::1`
@@ -306,7 +305,6 @@ dotnet run --project LocationVoitures.AppHost
 - `https://localhost:17030`
 
 3. dans `Resources`, cliquer sur la ligne `pgadmin`
-
 4. se connecter avec :
 
 - email : `admin@locationvoitures.fr`
@@ -353,7 +351,7 @@ On doit retrouver :
 
 ## 7. Partie 4 - Code de test intermediaire
 
-Le sujet proposait au debut un petit code de test temporaire dans `Program.cs`.  
+Le sujet proposait au debut un petit code de test temporaire dans `Program.cs`.
 Cette etape a ete depassee rapidement et remplacee par de vrais endpoints minimal API, ce qui est plus propre.
 
 ---
@@ -676,9 +674,9 @@ Admin123!
 
 ---
 
-## 16. TP1 Partie 2 - Etape 1 : ajout de la gateway YARP
+## 16. Partie 2 - Etape 1 : ajout de la gateway YARP
 
-La premiere etape de la partie 2 consiste a intercaler une gateway devant l'API.  
+La premiere etape de la partie 2 consiste a intercaler une gateway devant l'API.
 L'objectif est d'obtenir un point d'entree HTTP unique capable de router les requetes vers `LocationVoitures.ApiService`.
 
 ### 16.1. Pourquoi ajouter une gateway
@@ -810,3 +808,324 @@ il faudra verifier :
 - que l'URL de la gateway repond bien
 - que `GET /voitures`, `GET /locations` et `GET /loueurs` fonctionnent via la gateway
 - que les traces Aspire montrent bien le passage `gateway -> apiservice`
+
+---
+
+## 17. TP1 Partie 2 - Etape 2 : premier frontend Blazor branche sur la gateway
+
+Le sujet demande ensuite de coder une application Blazor capable, au minimum, d'afficher le catalogue des voitures.
+Nous avons commence par la plus petite brique utile : faire parler le projet `LocationVoitures.Web` a la gateway, puis afficher une premiere page `Catalogue`.
+
+### 17.1. Changement d'architecture
+
+Avant cette etape, le projet Web parlait directement au service `apiservice`.
+Desormais, il depend de la gateway.
+
+Dans `LocationVoitures.AppHost/AppHost.cs`, `webfrontend` reference maintenant `gateway` :
+
+```csharp
+builder.AddProject<Projects.LocationVoitures_Web>("webfrontend")
+    .WithExternalHttpEndpoints()
+    .WithHttpHealthCheck("/health")
+    .WithReference(gateway)
+    .WaitFor(gateway);
+```
+
+Cela correspond mieux a l'architecture du TP2 :
+
+- client Blazor
+- gateway YARP
+- API metier
+
+### 17.2. HttpClient du frontend
+
+Dans `LocationVoitures.Web/Program.cs`, le `HttpClient` n'utilise plus `apiservice` mais `gateway` :
+
+```csharp
+builder.Services.AddHttpClient<VoituresApiClient>(client =>
+{
+    client.BaseAddress = new("https+http://gateway");
+});
+```
+
+### 17.3. Premiere Vertical Slice frontend
+
+Pour rester coherent avec la logique du sujet, une premiere structure verticale a ete ajoutee :
+
+- `LocationVoitures.Web/Features/Voitures/Models/VoitureDto.cs`
+- `LocationVoitures.Web/Features/Voitures/Services/VoituresApiClient.cs`
+- `LocationVoitures.Web/Features/Voitures/Components/VoitureCard.razor`
+- `LocationVoitures.Web/Features/Voitures/Pages/Catalogue.razor`
+
+Roles :
+
+- `Models`
+  - contient le DTO utilise par le frontend
+- `Services`
+  - contient le client HTTP typé
+- `Components`
+  - contient un composant presentational pour afficher une voiture
+- `Pages`
+  - contient la page Razor du catalogue
+
+### 17.4. Premiere fonctionnalite implementee
+
+La page `Catalogue.razor` :
+
+- est accessible via la navigation du projet Web
+- appelle `GET /voitures` via la gateway
+- affiche les voitures dans une grille Bootstrap
+- montre la categorie, l'immatriculation, le prix journalier et la disponibilite
+
+### 17.5. Fichiers modifies ou remplaces
+
+- `LocationVoitures.Web/Program.cs`
+- `LocationVoitures.Web/Components/_Imports.razor`
+- `LocationVoitures.Web/Components/Layout/NavMenu.razor`
+- `LocationVoitures.Web/Components/Pages/Home.razor`
+- suppression de `LocationVoitures.Web/WeatherApiClient.cs`
+- suppression de `LocationVoitures.Web/Components/Pages/Weather.razor`
+
+Remplacements et ajouts :
+
+- `LocationVoitures.Web/Features/Voitures/Models/VoitureDto.cs`
+- `LocationVoitures.Web/Features/Voitures/Services/VoituresApiClient.cs`
+- `LocationVoitures.Web/Features/Voitures/Components/VoitureCard.razor`
+- `LocationVoitures.Web/Features/Voitures/Pages/Catalogue.razor`
+
+### 17.6. Verification
+
+Commandes de compilation :
+
+```bash
+/home/hugo/.dotnet/dotnet build LocationVoitures.Web/LocationVoitures.Web.csproj
+/home/hugo/.dotnet/dotnet build LocationVoitures.AppHost/LocationVoitures.AppHost.csproj
+```
+
+### 17.7. Validation attendue
+
+Apres lancement de l'orchestrateur :
+
+```bash
+/home/hugo/.dotnet/dotnet run --project LocationVoitures.AppHost
+```
+
+il faut verifier :
+
+- que `webfrontend` demarre correctement
+- que la page d'accueil s'ouvre
+- que le menu contient bien `Catalogue`
+- que la page `Catalogue` affiche les voitures
+- que les donnees proviennent bien de la gateway
+
+---
+
+## 18. TP1 Partie 2 - Etape 3 : frontend Blazor complet avant le paiement
+
+Le sujet demande ensuite d'aller plus loin que le simple catalogue :
+
+- rechercher une voiture par immatriculation
+- visualiser ses locations passees, en cours ou futures
+- creer une reservation
+- afficher les erreurs et validations de facon lisible
+
+Cette etape finalise ce parcours utilisateur, sans encore ajouter la partie paiement.
+
+### 18.1. Objectif fonctionnel
+
+Avant de coder le paiement, l'application Web doit deja permettre :
+
+1. de consulter le catalogue
+2. de filtrer les voitures par categorie
+3. de rechercher une voiture precise par immatriculation
+4. d'ouvrir une fiche detaillee sur cette voiture
+5. d'afficher l'historique de ses locations
+6. de reserver cette voiture en selectionnant un loueur et des dates
+
+### 18.2. Organisation frontend retenue
+
+Le projet `LocationVoitures.Web` reste structure par fonctionnalite :
+
+- `Features/Voitures`
+  - `Models`
+  - `Services`
+  - `Components`
+  - `Pages`
+- `Features/Locations`
+  - `Models`
+  - `Services`
+  - `Components`
+- `Features/Loueurs`
+  - `Models`
+  - `Services`
+
+Un `_Imports.razor` a egalement ete ajoute a la racine du projet Web pour que les composants situes hors du dossier `Components` beneficiient eux aussi des bons `@using`.
+
+### 18.3. Catalogue ameliore
+
+La page `LocationVoitures.Web/Features/Voitures/Pages/Catalogue.razor` ne se contente plus d'afficher une liste brute.
+
+Elle permet maintenant :
+
+- de filtrer le catalogue par categorie avec `GET /voitures?categorie=...`
+- de rechercher une voiture par immatriculation avec `GET /voitures/immatriculation/{immatriculation}`
+- d'afficher quelques indicateurs simples :
+  - nombre de voitures chargees
+  - nombre de voitures disponibles aujourd'hui
+  - filtre actif
+
+Chaque carte voiture contient aussi un bouton qui ouvre la fiche detaillee de la voiture.
+
+### 18.4. Fiche detaillee d'une voiture
+
+Une nouvelle page a ete ajoutee :
+
+- `LocationVoitures.Web/Features/Voitures/Pages/VoitureDetails.razor`
+
+Route :
+
+- `/catalogue/{immatriculation}`
+
+Cette page charge :
+
+- la voiture choisie via `VoituresApiClient`
+- les locations associees via `LocationsApiClient`
+- les loueurs via `LoueursApiClient`
+
+Elle sert de point d'entree unique pour :
+
+- lire les informations de la voiture
+- visualiser l'historique de location
+- reserver la voiture
+
+### 18.5. Composants metier ajoutes
+
+Pour garder un front lisible et maintenable, les morceaux de l'interface ont ete separes :
+
+- `LocationVoitures.Web/Features/Locations/Components/LocationsHistory.razor`
+  - affiche les locations d'une voiture
+  - calcule un statut utilisateur :
+    - `A venir`
+    - `En cours`
+    - `Terminee`
+    - `Annulee`
+
+- `LocationVoitures.Web/Features/Locations/Components/ReservationForm.razor`
+  - encapsule le formulaire de reservation
+  - appelle `POST /locations`
+  - remonte les erreurs renvoyees par l'API
+  - affiche le message de succes et le prix total
+
+### 18.6. Services frontend ajoutes ou etendus
+
+Le frontend utilise maintenant plusieurs clients HTTP typés :
+
+- `VoituresApiClient`
+  - `GetCatalogueAsync`
+  - `GetByImmatriculationAsync`
+
+- `LocationsApiClient`
+  - `GetByVoitureAsync`
+  - `CreateAsync`
+
+- `LoueursApiClient`
+  - `GetAllAsync`
+
+Une aide commune a ete ajoutee dans :
+
+- `LocationVoitures.Web/Services/ApiResponseHelper.cs`
+
+Son role est de :
+
+- lire les `ProblemDetails`
+- lire les `ValidationProblemDetails`
+- convertir une erreur HTTP en message lisible dans l'interface
+
+Cela evite de dupliquer la gestion d'erreur dans chaque composant Razor.
+
+### 18.7. Navigation et ergonomie
+
+La navigation et les styles ont ete ajustes pour rendre l'application plus claire :
+
+- `Components/Pages/Home.razor`
+  - devient une vraie page d'accueil du parcours utilisateur
+- `Components/Layout/MainLayout.razor`
+  - affiche une entete plus explicite
+- `Components/Layout/NavMenu.razor`
+  - ne garde que les entrees utiles
+- `wwwroot/app.css`
+  - ajoute des styles pour les panneaux, indicateurs, zones vides et formulaires
+
+Le but est que quelqu'un qui decouvre le projet comprenne rapidement :
+
+- ou commencer
+- ou chercher une voiture
+- ou reserver
+
+### 18.8. Fichiers principaux ajoutes ou modifies
+
+Ajouts :
+
+- `LocationVoitures.Web/_Imports.razor`
+- `LocationVoitures.Web/Features/Locations/Components/LocationsHistory.razor`
+- `LocationVoitures.Web/Features/Locations/Components/ReservationForm.razor`
+- `LocationVoitures.Web/Features/Voitures/Pages/VoitureDetails.razor`
+
+Modifications importantes :
+
+- `LocationVoitures.Web/Components/Layout/MainLayout.razor`
+- `LocationVoitures.Web/Components/Layout/MainLayout.razor.css`
+- `LocationVoitures.Web/Components/Layout/NavMenu.razor`
+- `LocationVoitures.Web/Components/Pages/Home.razor`
+- `LocationVoitures.Web/Features/Voitures/Components/VoitureCard.razor`
+- `LocationVoitures.Web/Features/Voitures/Pages/Catalogue.razor`
+- `LocationVoitures.Web/Features/Voitures/Services/VoituresApiClient.cs`
+- `LocationVoitures.Web/Features/Locations/Services/LocationsApiClient.cs`
+- `LocationVoitures.Web/Features/Loueurs/Services/LoueursApiClient.cs`
+- `LocationVoitures.Web/wwwroot/app.css`
+
+### 18.9. Verification
+
+Commande de verification la plus fiable :
+
+```bash
+/home/hugo/.dotnet/dotnet build LocationVoitures.AppHost/LocationVoitures.AppHost.csproj
+```
+
+Cette compilation reconstruit :
+
+- la gateway
+- l'API
+- le frontend Web
+- l'orchestrateur Aspire
+
+### 18.10. Validation attendue
+
+Apres lancement :
+
+```bash
+/home/hugo/.dotnet/dotnet run --project LocationVoitures.AppHost
+```
+
+il faut verifier :
+
+- que la page d'accueil Web s'ouvre correctement
+- que le menu contient bien `Accueil` et `Catalogue`
+- que la page `Catalogue` affiche les voitures via la gateway
+- que le filtre par categorie fonctionne
+- qu'une recherche par immatriculation ouvre la fiche de la voiture
+- que la fiche affiche ses locations
+- que le formulaire de reservation fonctionne
+- qu'une erreur metier de l'API remonte proprement dans l'interface
+
+### 18.11. Etat a ce stade
+
+Avant le paiement, le frontend couvre maintenant les besoins principaux du sujet :
+
+- catalogue
+- recherche
+- detail d'une voiture
+- historique des locations
+- reservation
+
+La prochaine etape logique du TP2 sera donc la partie `paiement`.

@@ -13,17 +13,17 @@ main {
 }
 
 .top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
+    background-color: #fcfbf7;
+    border-bottom: 1px solid #e8dcc8;
+    justify-content: space-between;
+    min-height: 4rem;
     display: flex;
     align-items: center;
+    gap: 1rem;
 }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
         white-space: nowrap;
-        margin-left: 1.5rem;
         text-decoration: none;
     }
 
@@ -31,18 +31,38 @@ main {
         text-decoration: underline;
     }
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+.layout-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.layout-heading strong {
+    color: #1f2a37;
+    font-size: 1rem;
+}
+
+.layout-heading span {
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.layout-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 
 @media (max-width: 640.98px) {
     .top-row {
-        justify-content: space-between;
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
     }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
+    .layout-links {
+        gap: 0.75rem;
     }
 }
 
@@ -62,12 +82,6 @@ main {
         position: sticky;
         top: 0;
         z-index: 1;
-    }
-
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
     }
 
     .top-row, article {
