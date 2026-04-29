@@ -1,0 +1,310 @@
+@page "/utilisateurs"
+
+@using LocationVoitures.Web.Features.Loueurs.Models
+@using LocationVoitures.Web.Features.Loueurs.Services
+@using LocationVoitures.Web.Services
+
+@inject LoueursApiClient LoueursApi
+@inject UserNotificationService Notifications
+
+<PageTitle>Gestion des utilisateurs</PageTitle>
+
+<section class="page-section">
+    <div class="page-header">
+        <span class="eyebrow">Utilisateurs</span>
+        <h1>Gerer les loueurs et leur acces a la reservation</h1>
+        <p class="lead">
+            Cette page regroupe la creation d'utilisateurs, leur consultation rapide et la gestion du statut de blacklist.
+        </p>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <div class="alert alert-danger" role="alert">@loadError</div>
+    }
+
+    <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <article class="metric-card">
+                <span class="metric-label">Utilisateurs</span>
+                <strong class="metric-value">@loueurs.Count</strong>
+                <div class="text-muted">Loueurs actuellement connus</div>
+            </article>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <article class="metric-card">
+                <span class="metric-label">Blacklistes</span>
+                <strong class="metric-value">@loueurs.Count(item => item.EstBlacklist)</strong>
+                <div class="text-muted">Utilisateurs bloques pour la reservation</div>
+            </article>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <article class="metric-card">
+                <span class="metric-label">Pays suivis</span>
+                <strong class="metric-value">@loueurs.Select(item => item.Pays).Distinct(StringComparer.OrdinalIgnoreCase).Count()</strong>
+                <div class="text-muted">Origines presentes dans le parc clients</div>
+            </article>
+        </div>
+    </div>
+
+    <div class="reservation-layout">
+        <section class="panel reservation-layout__main">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                <div>
+                    <h2 class="mb-1">Liste des utilisateurs</h2>
+                    <p class="text-muted mb-0">
+                        Utilisez la recherche pour retrouver un loueur puis activez ou retirez la blacklist selon la situation.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-md-8">
+                    <label class="form-label" for="loueurSearch">Recherche</label>
+                    <input id="loueurSearch" class="form-control" @bind="searchTerm" placeholder="Nom, prenom, email ou mobile" />
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="blacklistFilter">Statut</label>
+                    <select id="blacklistFilter" class="form-select" @bind="blacklistFilter">
+                        <option value="all">Tous</option>
+                        <option value="active">Actifs</option>
+                        <option value="blacklisted">Blacklistes</option>
+                    </select>
+                </div>
+            </div>
+
+            @if (isLoading)
+            {
+                <p><em>Chargement des utilisateurs...</em></p>
+            }
+            else if (FilteredLoueurs.Count == 0)
+            {
+                <div class="empty-state">
+                    <h3>Aucun utilisateur ne correspond au filtre</h3>
+                    <p>Essayez une autre recherche ou creez un nouveau loueur depuis le formulaire ci-contre.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th scope="col">Utilisateur</th>
+                                <th scope="col">Contact</th>
+                                <th scope="col">Pays</th>
+                                <th scope="col">Statut</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var loueur in FilteredLoueurs)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@loueur.Nom @loueur.Prenom</strong>
+                                        <div class="text-muted small">Loueur #@loueur.Id</div>
+                                    </td>
+                                    <td>
+                                        <div>@loueur.Mobile</div>
+                                        <div class="text-muted small">@(string.IsNullOrWhiteSpace(loueur.Email) ? "Email non renseigne" : loueur.Email)</div>
+                                    </td>
+                                    <td>@loueur.Pays</td>
+                                    <td>
+                                        <span class="badge @(loueur.EstBlacklist ? "text-bg-danger" : "text-bg-success")">
+                                            @(loueur.EstBlacklist ? "Blackliste" : "Actif")
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button type="button"
+                                                class="btn btn-sm @(loueur.EstBlacklist ? "btn-outline-success" : "btn-outline-danger")"
+                                                disabled="@IsStatusUpdatePending(loueur.Id)"
+                                                @onclick="() => ToggleBlacklistAsync(loueur)">
+                                            @if (IsStatusUpdatePending(loueur.Id))
+                                            {
+                                                <span>Mise a jour...</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@(loueur.EstBlacklist ? "Retirer la blacklist" : "Blacklister")</span>
+                                            }
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+
+        <section class="panel reservation-layout__side">
+            <h2>Ajouter un utilisateur</h2>
+            <EditForm Model="createRequest" OnValidSubmit="CreateLoueurAsync" FormName="create-loueur-form">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="validation-summary-errors mb-3" />
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label" for="nom">Nom</label>
+                        <InputText id="nom" class="form-control" @bind-Value="createRequest.Nom" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="prenom">Prenom</label>
+                        <InputText id="prenom" class="form-control" @bind-Value="createRequest.Prenom" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="mobile">Mobile</label>
+                        <InputText id="mobile" class="form-control" @bind-Value="createRequest.Mobile" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="email">Email</label>
+                        <InputText id="email" class="form-control" @bind-Value="createRequest.Email" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="pays">Pays</label>
+                        <InputText id="pays" class="form-control" @bind-Value="createRequest.Pays" />
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary" disabled="@isCreating">
+                        @(isCreating ? "Creation..." : "Creer le loueur")
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" @onclick="ResetCreateForm">Vider le formulaire</button>
+                </div>
+            </EditForm>
+        </section>
+    </div>
+</section>
+
+@code {
+    private IReadOnlyList<LoueurDto> loueurs = [];
+    private readonly CreateLoueurRequest createRequest = new();
+    private string searchTerm = string.Empty;
+    private string blacklistFilter = "all";
+    private string? loadError;
+    private bool isLoading = true;
+    private bool isCreating;
+    private int? pendingLoueurId;
+
+    private IReadOnlyList<LoueurDto> FilteredLoueurs =>
+        loueurs
+            .Where(MatchesSearch)
+            .Where(MatchesFilter)
+            .OrderBy(item => item.Nom)
+            .ThenBy(item => item.Prenom)
+            .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLoueursAsync();
+    }
+
+    private async Task LoadLoueursAsync()
+    {
+        isLoading = true;
+        loadError = null;
+
+        try
+        {
+            loueurs = await LoueursApi.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            loadError = "Impossible de charger la liste des utilisateurs.";
+            Notifications.ShowException(ex, "Chargement impossible");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateLoueurAsync()
+    {
+        isCreating = true;
+
+        try
+        {
+            await LoueursApi.CreateAsync(createRequest);
+            ResetCreateForm();
+            await LoadLoueursAsync();
+            Notifications.ShowSuccess("Utilisateur cree", "Le nouveau loueur a bien ete ajoute.");
+        }
+        catch (Exception ex)
+        {
+            Notifications.ShowException(ex, "Creation impossible");
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
+    private async Task ToggleBlacklistAsync(LoueurDto loueur)
+    {
+        pendingLoueurId = loueur.Id;
+
+        try
+        {
+            await LoueursApi.UpdateBlacklistAsync(loueur.Id, !loueur.EstBlacklist);
+            await LoadLoueursAsync();
+            Notifications.ShowSuccess(
+                loueur.EstBlacklist ? "Utilisateur rehabilite" : "Utilisateur blackliste",
+                loueur.EstBlacklist
+                    ? "Le loueur peut a nouveau effectuer des reservations."
+                    : "Le loueur ne pourra plus reserver tant qu'il reste blackliste.");
+        }
+        catch (Exception ex)
+        {
+            Notifications.ShowException(ex, "Mise a jour impossible");
+        }
+        finally
+        {
+            pendingLoueurId = null;
+        }
+    }
+
+    private void ResetCreateForm()
+    {
+        createRequest.Nom = string.Empty;
+        createRequest.Prenom = string.Empty;
+        createRequest.Mobile = string.Empty;
+        createRequest.Email = string.Empty;
+        createRequest.Pays = "France";
+    }
+
+    private bool IsStatusUpdatePending(int loueurId)
+        => pendingLoueurId == loueurId;
+
+    private bool MatchesSearch(LoueurDto loueur)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return true;
+        }
+
+        var term = searchTerm.Trim();
+
+        return loueur.Nom.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+               loueur.Prenom.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+               loueur.Mobile.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+               (loueur.Email?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    private bool MatchesFilter(LoueurDto loueur)
+        => blacklistFilter switch
+        {
+            "active" => !loueur.EstBlacklist,
+            "blacklisted" => loueur.EstBlacklist,
+            _ => true
+        };
+}

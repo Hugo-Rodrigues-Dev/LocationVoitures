@@ -1568,3 +1568,91 @@ il faut verifier :
 - qu'une reservation future peut etre annulee depuis l'historique
 - qu'une reservation deja annulee ne peut pas etre annulee une seconde fois
 - qu'un refus de paiement affiche une notification lisible
+
+---
+
+## 21. Alignement final avec les ecrans de gestion attendus
+
+Le TP2 etait deja termine d'un point de vue fonctionnel :
+
+- gateway YARP
+- catalogue Blazor
+- recherche par immatriculation
+- fiche vehicule
+- page de reservation
+- paiement fictif
+- gestion des erreurs
+
+Les derniers ajustements ont surtout consiste a rapprocher l'interface du rendu de gestion suggere en fin de sujet.
+
+### 21.1. Onglet Utilisateurs
+
+Un nouvel onglet de navigation a ete ajoute :
+
+- `Utilisateurs`
+
+Il pointe vers :
+
+- `LocationVoitures.Web/Features/Loueurs/Pages/Utilisateurs.razor`
+
+Cette page permet :
+
+- d'afficher la liste des loueurs
+- de rechercher un utilisateur
+- de filtrer les utilisateurs actifs ou blacklistes
+- de creer un nouveau loueur
+- de blacklister ou rehabiliter un loueur
+
+Le front utilise :
+
+- `LoueursApiClient.GetAllAsync()`
+- `LoueursApiClient.CreateAsync(...)`
+- `LoueursApiClient.UpdateBlacklistAsync(...)`
+
+### 21.2. Onglet Vehicules
+
+Un nouvel onglet de navigation a ete ajoute :
+
+- `Vehicules`
+
+Il pointe vers :
+
+- `LocationVoitures.Web/Features/Voitures/Pages/Vehicules.razor`
+
+Cette page propose une vue tableau du parc, plus orientee gestion que le catalogue par cartes.
+
+Elle permet :
+
+- de rechercher un vehicule
+- de filtrer par categorie
+- de filtrer par disponibilite
+- de visualiser le tarif et le statut
+- d'acceder a la fiche detaillee
+- d'ouvrir directement la page de reservation
+
+### 21.3. Navigation et accueil
+
+Les liens ont ete ajoutes dans :
+
+- `LocationVoitures.Web/Components/Layout/NavMenu.razor`
+- `LocationVoitures.Web/Components/Layout/MainLayout.razor`
+
+La page d'accueil a aussi ete mise a jour pour presenter :
+
+- le catalogue
+- le tableau vehicules
+- l'espace reservations
+- la gestion des utilisateurs
+
+### 21.4. Conclusion sur l'etat du TP
+
+Si l'on compare strictement au PDF :
+
+- les besoins obligatoires sont couverts
+- le bonus paiement est couvert
+- les vues de gestion supplementaires sont maintenant presentes
+
+Conclusion :
+
+- oui, le TP est maintenant termine completement
+- les ajouts restants relevent surtout d'ameliorations optionnelles ou de preferences de design

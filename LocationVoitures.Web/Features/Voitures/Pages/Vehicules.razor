@@ -1,0 +1,209 @@
+@page "/vehicules"
+
+@using LocationVoitures.Web.Features.Voitures.Models
+@using LocationVoitures.Web.Features.Voitures.Services
+@using LocationVoitures.Web.Services
+
+@inject VoituresApiClient VoituresApi
+@inject UserNotificationService Notifications
+
+<PageTitle>Gestion des vehicules</PageTitle>
+
+<section class="page-section">
+    <div class="page-header">
+        <span class="eyebrow">Vehicules</span>
+        <h1>Superviser le parc sous forme de tableau</h1>
+        <p class="lead">
+            Cette vue est orientee gestion : elle permet de filtrer rapidement le parc, de verifier les disponibilites
+            et d'acceder aux actions principales sans repasser par des cartes.
+        </p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <article class="metric-card">
+                <span class="metric-label">Vehicules</span>
+                <strong class="metric-value">@voitures.Count</strong>
+                <div class="text-muted">Parc charge depuis l'API</div>
+            </article>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <article class="metric-card">
+                <span class="metric-label">Disponibles</span>
+                <strong class="metric-value">@voitures.Count(item => item.EstDisponible)</strong>
+                <div class="text-muted">Disponibles aujourd'hui</div>
+            </article>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <article class="metric-card">
+                <span class="metric-label">Filtre</span>
+                <strong class="metric-value metric-value--small">@(string.IsNullOrWhiteSpace(selectedCategorie) ? "Toutes" : selectedCategorie)</strong>
+                <div class="text-muted">Categorie actuellement affichee</div>
+            </article>
+        </div>
+    </div>
+
+    <section class="panel">
+        <div class="row g-3 mb-3">
+            <div class="col-12 col-lg-4">
+                <label class="form-label" for="vehiculeSearch">Recherche</label>
+                <input id="vehiculeSearch" class="form-control" @bind="searchTerm" placeholder="Marque, modele ou immatriculation" />
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <label class="form-label" for="vehiculeCategorie">Categorie</label>
+                <select id="vehiculeCategorie" class="form-select" @bind="selectedCategorie">
+                    <option value="">Toutes les categories</option>
+                    @foreach (var categorie in categories)
+                    {
+                        <option value="@categorie">@categorie</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <label class="form-label" for="vehiculeDisponibilite">Disponibilite</label>
+                <select id="vehiculeDisponibilite" class="form-select" @bind="availabilityFilter">
+                    <option value="all">Toutes</option>
+                    <option value="available">Disponibles</option>
+                    <option value="unavailable">Indisponibles</option>
+                </select>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(loadError))
+        {
+            <div class="alert alert-danger" role="alert">@loadError</div>
+        }
+        else if (isLoading)
+        {
+            <p><em>Chargement des vehicules...</em></p>
+        }
+        else if (FilteredVoitures.Count == 0)
+        {
+            <div class="empty-state">
+                <h3>Aucun vehicule ne correspond aux filtres</h3>
+                <p>Essayez une autre recherche ou revenez au catalogue pour explorer le parc autrement.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Immatriculation</th>
+                            <th scope="col">Vehicule</th>
+                            <th scope="col">Categorie</th>
+                            <th scope="col">Tarif / jour</th>
+                            <th scope="col">Disponibilite</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var voiture in FilteredVoitures)
+                        {
+                            <tr>
+                                <td><strong>@voiture.Immatriculation</strong></td>
+                                <td>
+                                    <strong>@voiture.Marque @voiture.Modele</strong>
+                                </td>
+                                <td>@voiture.Categorie</td>
+                                <td>@voiture.PrixParJour.ToString("0.00") EUR</td>
+                                <td>
+                                    <span class="badge @(voiture.EstDisponible ? "text-bg-success" : "text-bg-secondary")">
+                                        @(voiture.EstDisponible ? "Disponible" : "Indisponible")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="table-actions">
+                                        <a class="btn btn-sm btn-outline-secondary" href="/catalogue/@voiture.Immatriculation">Fiche</a>
+                                        <a class="btn btn-sm btn-primary" href="/reservations/@voiture.Immatriculation">Reserver</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</section>
+
+@code {
+    private IReadOnlyList<VoitureDto> voitures = [];
+    private List<string> categories = [];
+    private string searchTerm = string.Empty;
+    private string selectedCategorie = string.Empty;
+    private string availabilityFilter = "all";
+    private string? loadError;
+    private bool isLoading = true;
+
+    private IReadOnlyList<VoitureDto> FilteredVoitures =>
+        voitures
+            .Where(MatchesSearch)
+            .Where(MatchesCategory)
+            .Where(MatchesAvailability)
+            .OrderBy(item => item.Marque)
+            .ThenBy(item => item.Modele)
+            .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVehiculesAsync();
+    }
+
+    private async Task LoadVehiculesAsync()
+    {
+        isLoading = true;
+        loadError = null;
+
+        try
+        {
+            voitures = await VoituresApi.GetCatalogueAsync();
+            categories = voitures
+                .Select(item => item.Categorie)
+                .Where(item => !string.IsNullOrWhiteSpace(item))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(item => item)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            loadError = "Impossible de charger la liste des vehicules.";
+            Notifications.ShowException(ex, "Chargement impossible");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private bool MatchesSearch(VoitureDto voiture)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return true;
+        }
+
+        var term = searchTerm.Trim();
+
+        return voiture.Immatriculation.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+               voiture.Marque.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+               voiture.Modele.Contains(term, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool MatchesCategory(VoitureDto voiture)
+        => string.IsNullOrWhiteSpace(selectedCategorie) ||
+           string.Equals(voiture.Categorie, selectedCategorie, StringComparison.OrdinalIgnoreCase);
+
+    private bool MatchesAvailability(VoitureDto voiture)
+        => availabilityFilter switch
+        {
+            "available" => voiture.EstDisponible,
+            "unavailable" => !voiture.EstDisponible,
+            _ => true
+        };
+}
