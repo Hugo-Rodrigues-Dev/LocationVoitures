@@ -14,6 +14,12 @@ var apiService = builder.AddProject<Projects.LocationVoitures_ApiService>("apise
     .WaitFor(rentalDb)
     .WithHttpHealthCheck("/health");
 
+var gateway = builder.AddProject<Projects.LocationVoitures_Gateway>("gateway")
+    .WithReference(apiService)
+    .WaitFor(apiService)
+    .WithExternalHttpEndpoints()
+    .WithHttpHealthCheck("/health");
+
 builder.AddProject<Projects.LocationVoitures_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")

@@ -1,0 +1,19 @@
+@LocationVoitures.Gateway_HostAddress = http://localhost:5195
+
+GET {{LocationVoitures.Gateway_HostAddress}}/
+Accept: application/json
+
+###
+
+GET {{LocationVoitures.Gateway_HostAddress}}/voitures
+Accept: application/json
+
+###
+
+GET {{LocationVoitures.Gateway_HostAddress}}/locations
+Accept: application/json
+
+###
+
+GET {{LocationVoitures.Gateway_HostAddress}}/loueurs
+Accept: application/json

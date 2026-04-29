@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LocationVoitures.ApiService\LocationVoitures.ApiService.csproj" />
+    <ProjectReference Include="..\LocationVoitures.Gateway\LocationVoitures.Gateway.csproj" />
     <ProjectReference Include="..\LocationVoitures.Web\LocationVoitures.Web.csproj" />
   </ItemGroup>
 

@@ -673,3 +673,140 @@ dotnet run --project LocationVoitures.ApiService
 admin@locationvoitures.fr
 Admin123!
 ```
+
+---
+
+## 16. TP1 Partie 2 - Etape 1 : ajout de la gateway YARP
+
+La premiere etape de la partie 2 consiste a intercaler une gateway devant l'API.  
+L'objectif est d'obtenir un point d'entree HTTP unique capable de router les requetes vers `LocationVoitures.ApiService`.
+
+### 16.1. Pourquoi ajouter une gateway
+
+Meme si notre application reste monolithique, la gateway apporte deja plusieurs avantages :
+
+- un point d'entree unique pour les clients
+- une future centralisation de la securite
+- une future centralisation du CORS
+- la possibilite d'ajouter d'autres services sans changer l'URL connue par les clients
+
+### 16.2. Creation du projet
+
+Le projet a ete cree comme une application ASP.NET Core vide :
+
+```bash
+/home/hugo/.dotnet/dotnet new web -n LocationVoitures.Gateway -f net10.0
+/home/hugo/.dotnet/dotnet sln LocationVoitures.sln add LocationVoitures.Gateway/LocationVoitures.Gateway.csproj
+```
+
+### 16.3. Packages et references ajoutes
+
+Packages YARP :
+
+```bash
+/home/hugo/.dotnet/dotnet add LocationVoitures.Gateway/LocationVoitures.Gateway.csproj package Yarp.ReverseProxy
+/home/hugo/.dotnet/dotnet add LocationVoitures.Gateway/LocationVoitures.Gateway.csproj package Microsoft.Extensions.ServiceDiscovery.Yarp
+```
+
+Reference au projet commun Aspire :
+
+```bash
+/home/hugo/.dotnet/dotnet add LocationVoitures.Gateway/LocationVoitures.Gateway.csproj reference LocationVoitures.ServiceDefaults/LocationVoitures.ServiceDefaults.csproj
+```
+
+Cette reference est importante, car elle permet a la gateway de beneficier de :
+
+- la telemetrie OpenTelemetry
+- les health checks
+- la decouverte de services Aspire
+
+### 16.4. Configuration de la gateway
+
+Le fichier `LocationVoitures.Gateway/Program.cs` a ete modifie pour :
+
+- activer `AddServiceDefaults()`
+- charger la configuration YARP depuis `appsettings.json`
+- activer le resolver de service discovery Aspire
+- exposer un endpoint `/` informatif
+- mapper le reverse proxy YARP
+- exposer les endpoints de health check
+
+### 16.5. Routes YARP configurees
+
+Dans `LocationVoitures.Gateway/appsettings.json`, trois prefixes sont routes vers `apiservice` :
+
+- `/voitures/{**catch-all}`
+- `/locations/{**catch-all}`
+- `/loueurs/{**catch-all}`
+
+Le cluster cible utilise :
+
+```json
+"Address": "https+http://apiservice"
+```
+
+Cela permet a YARP de s'appuyer sur la decouverte de services Aspire au lieu d'une URL fixe.
+
+### 16.6. Integration dans AppHost
+
+Le projet `LocationVoitures.Gateway` a ete reference dans `LocationVoitures.AppHost`.
+
+Dans `AppHost.cs`, la ressource Aspire suivante a ete ajoutee :
+
+```csharp
+var gateway = builder.AddProject<Projects.LocationVoitures_Gateway>("gateway")
+    .WithReference(apiService)
+    .WaitFor(apiService)
+    .WithExternalHttpEndpoints()
+    .WithHttpHealthCheck("/health");
+```
+
+Cette configuration signifie que :
+
+- la gateway connait `apiservice`
+- elle attend que l'API soit disponible
+- elle est exposee publiquement
+- elle apparait proprement dans Aspire avec son endpoint de sante
+
+### 16.7. Fichiers ajoutes ou modifies
+
+- `LocationVoitures.Gateway/Program.cs`
+- `LocationVoitures.Gateway/appsettings.json`
+- `LocationVoitures.Gateway/LocationVoitures.Gateway.csproj`
+- `LocationVoitures.Gateway/LocationVoitures.Gateway.http`
+- `LocationVoitures.AppHost/AppHost.cs`
+- `LocationVoitures.AppHost/LocationVoitures.AppHost.csproj`
+- `LocationVoitures.sln`
+
+### 16.8. Fichier HTTP de test
+
+Un fichier `LocationVoitures.Gateway/LocationVoitures.Gateway.http` a ete ajoute pour tester rapidement :
+
+- `/`
+- `/voitures`
+- `/locations`
+- `/loueurs`
+
+### 16.9. Validation de compilation
+
+Commandes de verification :
+
+```bash
+/home/hugo/.dotnet/dotnet build LocationVoitures.Gateway/LocationVoitures.Gateway.csproj
+/home/hugo/.dotnet/dotnet build LocationVoitures.AppHost/LocationVoitures.AppHost.csproj
+```
+
+### 16.10. Prochaine verification a faire
+
+Apres lancement de l'AppHost :
+
+```bash
+/home/hugo/.dotnet/dotnet run --project LocationVoitures.AppHost
+```
+
+il faudra verifier :
+
+- que la ressource `gateway` apparait dans Aspire
+- que l'URL de la gateway repond bien
+- que `GET /voitures`, `GET /locations` et `GET /loueurs` fonctionnent via la gateway
+- que les traces Aspire montrent bien le passage `gateway -> apiservice`

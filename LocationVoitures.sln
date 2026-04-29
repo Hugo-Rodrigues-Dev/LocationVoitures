@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocationVoitures.Web", "Loc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocationVoitures.Tests", "LocationVoitures.Tests\LocationVoitures.Tests.csproj", "{64F0DDDB-5720-4DB0-BD7C-04852B48E58D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocationVoitures.Gateway", "LocationVoitures.Gateway\LocationVoitures.Gateway.csproj", "{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{64F0DDDB-5720-4DB0-BD7C-04852B48E58D}.Release|x64.Build.0 = Release|Any CPU
 		{64F0DDDB-5720-4DB0-BD7C-04852B48E58D}.Release|x86.ActiveCfg = Release|Any CPU
 		{64F0DDDB-5720-4DB0-BD7C-04852B48E58D}.Release|x86.Build.0 = Release|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Debug|x64.Build.0 = Debug|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Debug|x86.Build.0 = Debug|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Release|x64.ActiveCfg = Release|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Release|x64.Build.0 = Release|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Release|x86.ActiveCfg = Release|Any CPU
+		{208EB968-CEF1-4B1D-9AE5-FFEED4074AC7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
