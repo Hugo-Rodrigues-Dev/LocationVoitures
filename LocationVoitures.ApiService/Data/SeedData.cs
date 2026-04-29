@@ -72,7 +72,8 @@ public static class SeedData
                 LoueurId = loueurs[0].Id,
                 DateDebut = DateOnly.FromDateTime(DateTime.UtcNow.Date),
                 DateFin = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(2)),
-                Annule = false
+                Annule = false,
+                Paye = true
             },
             new Location
             {
@@ -80,7 +81,8 @@ public static class SeedData
                 LoueurId = loueurs[1].Id,
                 DateDebut = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(5)),
                 DateFin = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(7)),
-                Annule = false
+                Annule = false,
+                Paye = true
             }
         };
 

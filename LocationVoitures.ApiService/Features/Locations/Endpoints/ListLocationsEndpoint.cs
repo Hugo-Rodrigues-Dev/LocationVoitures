@@ -21,7 +21,8 @@ public static class ListLocationsEndpoint
                     LoueurId = location.LoueurId,
                     DateDebut = location.DateDebut,
                     DateFin = location.DateFin,
-                    Annule = location.Annule
+                    Annule = location.Annule,
+                    Paye = location.Paye
                 })
                 .ToListAsync();
 

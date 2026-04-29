@@ -1128,4 +1128,227 @@ Avant le paiement, le frontend couvre maintenant les besoins principaux du sujet
 - historique des locations
 - reservation
 
-La prochaine etape logique du TP2 sera donc la partie `paiement`.
+---
+
+## 19. TP1 Partie 2 - Etape 4 : service de paiement fake et reservation payee
+
+Le sujet propose ensuite d'ajouter un service de paiement fictif.  
+Cette partie a ete implementée comme un vrai service separe, afin de rester coherente avec l'architecture Aspire mise en place avec la gateway.
+
+### 19.1. Objectif
+
+Lorsqu'un utilisateur cree une reservation :
+
+1. l'API valide les regles metier habituelles
+2. l'API calcule le prix total
+3. l'API appelle un service de paiement fake
+4. si le paiement est autorise, la location est creee avec `Paye = true`
+5. si le paiement est refuse, la reservation n'est pas creee
+
+### 19.2. Nouveau projet ajoute
+
+Un nouveau projet a ete cree :
+
+- `LocationVoitures.PaymentService`
+
+Commande utilisee :
+
+```bash
+/home/hugo/.dotnet/dotnet new web -n LocationVoitures.PaymentService -f net10.0
+/home/hugo/.dotnet/dotnet sln LocationVoitures.sln add LocationVoitures.PaymentService/LocationVoitures.PaymentService.csproj
+```
+
+Ce service reference `LocationVoitures.ServiceDefaults` pour profiter de :
+
+- la decouverte de services Aspire
+- la telemetrie
+- les health checks
+
+### 19.3. Structure du service de paiement
+
+Le projet de paiement suit la meme logique de structure que les autres services :
+
+- `Features/Payments/Endpoints`
+- `Features/Payments/Requests`
+- `Features/Payments/Responses`
+- `Features/Payments/Validators`
+- `Features/Payments/Services`
+
+Fichiers principaux :
+
+- `LocationVoitures.PaymentService/Program.cs`
+- `LocationVoitures.PaymentService/Features/Payments/Endpoints/AuthorizePaymentEndpoint.cs`
+- `LocationVoitures.PaymentService/Features/Payments/Requests/PaymentAuthorizationRequest.cs`
+- `LocationVoitures.PaymentService/Features/Payments/Responses/PaymentAuthorizationResponse.cs`
+- `LocationVoitures.PaymentService/Features/Payments/Validators/PaymentAuthorizationRequestValidator.cs`
+- `LocationVoitures.PaymentService/Features/Payments/Services/CardValidationService.cs`
+
+### 19.4. Endpoint du service de paiement
+
+Le service expose :
+
+- `POST /payments/authorize`
+
+Il verifie :
+
+- la presence des donnees de paiement
+- le numero de carte via l'algorithme de Luhn
+- la date d'expiration
+
+Le retour reste volontairement simple :
+
+- `IsAuthorized`
+- `Code`
+- `Message`
+
+### 19.5. Integration dans AppHost
+
+Le service de paiement a ete ajoute a l'orchestrateur dans `LocationVoitures.AppHost/AppHost.cs` :
+
+- la ressource `paymentservice` est declaree
+- `apiservice` depend maintenant de `paymentservice`
+
+Cela permet a l'API metier d'attendre le service de paiement avant de demarrer completement.
+
+### 19.6. Integration dans l'API metier
+
+Dans `LocationVoitures.ApiService`, une integration HTTP a ete ajoutee :
+
+- `Features/Paiements/Requests/AutoriserPaiementRequest.cs`
+- `Features/Paiements/Responses/AutoriserPaiementResponse.cs`
+- `Features/Paiements/Services/PaiementApiClient.cs`
+
+Dans `Program.cs`, l'API enregistre maintenant :
+
+```csharp
+builder.Services.AddHttpClient<PaiementApiClient>(client =>
+{
+    client.BaseAddress = new("https+http://paymentservice");
+});
+```
+
+Le endpoint `POST /locations` appelle donc desormais le service de paiement avant d'enregistrer la location.
+
+### 19.7. Evolution du modele Location
+
+Le modele `Location` a ete enrichi avec :
+
+- `Paye`
+
+Cette propriete est :
+
+- ajoutee dans `Domain/Location.cs`
+- configuree avec une valeur par defaut dans `RentalDbContext`
+- alimentee dans le seed avec `true` pour les locations deja existantes
+
+### 19.8. Evolution de la reservation
+
+Le DTO de reservation contient maintenant :
+
+- `NumeroCarte`
+- `MoisExpiration`
+- `AnneeExpiration`
+
+Ces champs ont ete ajoutes :
+
+- dans l'API
+- dans le frontend Blazor
+- dans les validations FluentValidation
+
+En cas de paiement accepte :
+
+- `ReserverResponse` indique que le paiement est confirme
+- la location est enregistree avec `Paye = true`
+
+En cas de paiement refuse :
+
+- l'API renvoie un `402 Payment Required`
+- le frontend affiche une notification claire
+
+En cas d'indisponibilite du service :
+
+- l'API renvoie un `503 Service Unavailable`
+- le frontend affiche un message indiquant que le service de paiement est indisponible
+
+### 19.9. Frontend et paiement
+
+Le formulaire de reservation a ete complete dans :
+
+- `LocationVoitures.Web/Features/Locations/Components/ReservationForm.razor`
+
+Il contient maintenant :
+
+- le numero de carte
+- le mois d'expiration
+- l'annee d'expiration
+
+L'historique des locations affiche aussi desormais l'etat de paiement :
+
+- `Paye`
+- `En attente`
+
+### 19.10. Gestion d'erreurs cote frontend
+
+Le mecanisme de notification global mis en place precedemment a ete reutilise pour le paiement.
+
+Cas geres :
+
+- numero de carte invalide
+- carte expiree
+- paiement refuse
+- service de paiement indisponible
+- erreurs inattendues pendant le rafraichissement de la fiche voiture
+
+### 19.11. Tests ajoutes ou etendus
+
+Les tests ont ete etendus pour couvrir cette partie :
+
+- `LocationVoitures.Tests/Features/Locations/ReserverRequestValidatorTests.cs`
+  - couverture des champs de paiement
+- `LocationVoitures.Tests/Services/CardValidationServiceTests.cs`
+  - tests Luhn
+  - tests d'expiration
+
+### 19.12. Migration EF Core
+
+Une migration a ete generee pour ajouter le champ `paye` :
+
+```bash
+/home/hugo/.dotnet/dotnet ef migrations add AddPaymentSupport --project LocationVoitures.ApiService --startup-project LocationVoitures.ApiService
+```
+
+Fichiers generes :
+
+- `LocationVoitures.ApiService/Migrations/20260429113709_AddPaymentSupport.cs`
+- `LocationVoitures.ApiService/Migrations/20260429113709_AddPaymentSupport.Designer.cs`
+- mise a jour de `RentalDbContextModelSnapshot.cs`
+
+### 19.13. Verification
+
+Compilation :
+
+```bash
+/home/hugo/.dotnet/dotnet build LocationVoitures.AppHost/LocationVoitures.AppHost.csproj
+```
+
+Tests :
+
+```bash
+/home/hugo/.dotnet/dotnet test LocationVoitures.Tests/LocationVoitures.Tests.csproj
+```
+
+### 19.14. Validation attendue
+
+Apres lancement :
+
+```bash
+/home/hugo/.dotnet/dotnet run --project LocationVoitures.AppHost
+```
+
+il faut verifier :
+
+- que `paymentservice` apparait dans Aspire
+- qu'une reservation avec une carte valide fonctionne
+- qu'une reservation avec une carte invalide est refusee
+- qu'une reservation avec une carte expiree est refusee
+- que l'historique affiche l'etat `Paye`

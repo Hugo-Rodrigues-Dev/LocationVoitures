@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LocationVoitures.ApiService\LocationVoitures.ApiService.csproj" />
+    <ProjectReference Include="..\LocationVoitures.PaymentService\LocationVoitures.PaymentService.csproj" />
   </ItemGroup>
 
 </Project>

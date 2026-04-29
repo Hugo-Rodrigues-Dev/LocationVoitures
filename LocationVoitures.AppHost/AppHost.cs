@@ -9,9 +9,15 @@ var postgres = builder.AddPostgres("postgres")
 
 var rentalDb = postgres.AddDatabase("RentalDb");
 
+var paymentService = builder.AddProject<Projects.LocationVoitures_PaymentService>("paymentservice")
+    .WithExternalHttpEndpoints()
+    .WithHttpHealthCheck("/health");
+
 var apiService = builder.AddProject<Projects.LocationVoitures_ApiService>("apiservice")
     .WithReference(rentalDb)
     .WaitFor(rentalDb)
+    .WithReference(paymentService)
+    .WaitFor(paymentService)
     .WithHttpHealthCheck("/health");
 
 var gateway = builder.AddProject<Projects.LocationVoitures_Gateway>("gateway")

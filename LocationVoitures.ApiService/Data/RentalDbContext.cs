@@ -20,5 +20,9 @@ public class RentalDbContext(DbContextOptions<RentalDbContext> options) : DbCont
         modelBuilder.Entity<Loueur>()
             .Property(loueur => loueur.EstBlacklist)
             .HasDefaultValue(false);
+
+        modelBuilder.Entity<Location>()
+            .Property(location => location.Paye)
+            .HasDefaultValue(false);
     }
 }

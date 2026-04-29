@@ -15,7 +15,10 @@ public class ReserverRequestValidatorTests
             Immatriculation = "AA-123-BB",
             LoueurId = 1,
             DateDebut = new DateOnly(2026, 5, 10),
-            DateFin = new DateOnly(2026, 5, 12)
+            DateFin = new DateOnly(2026, 5, 12),
+            NumeroCarte = "4242424242424242",
+            MoisExpiration = 12,
+            AnneeExpiration = 2030
         };
 
         var result = _validator.Validate(request);
@@ -31,7 +34,10 @@ public class ReserverRequestValidatorTests
             Immatriculation = "AA-123-BB",
             LoueurId = 0,
             DateDebut = new DateOnly(2026, 5, 10),
-            DateFin = new DateOnly(2026, 5, 12)
+            DateFin = new DateOnly(2026, 5, 12),
+            NumeroCarte = "4242424242424242",
+            MoisExpiration = 12,
+            AnneeExpiration = 2030
         };
 
         var result = _validator.Validate(request);
@@ -48,7 +54,10 @@ public class ReserverRequestValidatorTests
             Immatriculation = "AA-123-BB",
             LoueurId = 1,
             DateDebut = new DateOnly(2026, 5, 12),
-            DateFin = new DateOnly(2026, 5, 10)
+            DateFin = new DateOnly(2026, 5, 10),
+            NumeroCarte = "4242424242424242",
+            MoisExpiration = 12,
+            AnneeExpiration = 2030
         };
 
         var result = _validator.Validate(request);
@@ -65,12 +74,55 @@ public class ReserverRequestValidatorTests
             Immatriculation = "1234",
             LoueurId = 1,
             DateDebut = new DateOnly(2026, 5, 10),
-            DateFin = new DateOnly(2026, 5, 12)
+            DateFin = new DateOnly(2026, 5, 12),
+            NumeroCarte = "4242424242424242",
+            MoisExpiration = 12,
+            AnneeExpiration = 2030
         };
 
         var result = _validator.Validate(request);
 
         Assert.That(result.IsValid, Is.False);
         Assert.That(result.Errors.Any(error => error.PropertyName == nameof(ReserverRequest.Immatriculation)), Is.True);
+    }
+
+    [Test]
+    public void ShouldRejectMissingCardNumber()
+    {
+        var request = new ReserverRequest
+        {
+            Immatriculation = "AA-123-BB",
+            LoueurId = 1,
+            DateDebut = new DateOnly(2026, 5, 10),
+            DateFin = new DateOnly(2026, 5, 12),
+            NumeroCarte = string.Empty,
+            MoisExpiration = 12,
+            AnneeExpiration = 2030
+        };
+
+        var result = _validator.Validate(request);
+
+        Assert.That(result.IsValid, Is.False);
+        Assert.That(result.Errors.Any(error => error.PropertyName == nameof(ReserverRequest.NumeroCarte)), Is.True);
+    }
+
+    [Test]
+    public void ShouldRejectInvalidExpirationMonth()
+    {
+        var request = new ReserverRequest
+        {
+            Immatriculation = "AA-123-BB",
+            LoueurId = 1,
+            DateDebut = new DateOnly(2026, 5, 10),
+            DateFin = new DateOnly(2026, 5, 12),
+            NumeroCarte = "4242424242424242",
+            MoisExpiration = 13,
+            AnneeExpiration = 2030
+        };
+
+        var result = _validator.Validate(request);
+
+        Assert.That(result.IsValid, Is.False);
+        Assert.That(result.Errors.Any(error => error.PropertyName == nameof(ReserverRequest.MoisExpiration)), Is.True);
     }
 }

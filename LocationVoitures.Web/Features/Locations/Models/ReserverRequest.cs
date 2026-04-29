@@ -16,4 +16,13 @@ public class ReserverRequest
 
     [Required(ErrorMessage = "La date de fin est obligatoire.")]
     public DateOnly DateFin { get; set; } = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+
+    [Required(ErrorMessage = "Le numero de carte est obligatoire.")]
+    public string NumeroCarte { get; set; } = string.Empty;
+
+    [Range(1, 12, ErrorMessage = "Le mois d'expiration doit etre compris entre 1 et 12.")]
+    public int MoisExpiration { get; set; } = DateTime.Today.Month;
+
+    [Range(2000, 9999, ErrorMessage = "L'annee d'expiration doit etre valide.")]
+    public int AnneeExpiration { get; set; } = DateTime.Today.Year + 1;
 }

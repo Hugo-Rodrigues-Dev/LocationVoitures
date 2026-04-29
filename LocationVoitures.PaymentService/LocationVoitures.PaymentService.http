@@ -1,0 +1,12 @@
+@LocationVoitures.PaymentService_HostAddress = http://localhost:5180
+
+POST {{LocationVoitures.PaymentService_HostAddress}}/payments/authorize
+Content-Type: application/json
+
+{
+  "cardNumber": "4242 4242 4242 4242",
+  "expirationMonth": 12,
+  "expirationYear": 2030,
+  "amount": 135.00,
+  "currency": "EUR"
+}

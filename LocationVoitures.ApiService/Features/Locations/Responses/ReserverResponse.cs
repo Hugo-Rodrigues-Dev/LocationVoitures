@@ -12,4 +12,7 @@ public class ReserverResponse
 
     [Description("Message de confirmation renvoye par l'API.")]
     public string Message { get; init; } = string.Empty;
+
+    [Description("Indique si le paiement de la reservation a ete confirme.")]
+    public bool PaiementConfirme { get; init; }
 }

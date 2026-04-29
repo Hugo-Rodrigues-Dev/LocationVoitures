@@ -25,5 +25,14 @@ public class ReserverRequestValidator : AbstractValidator<ReserverRequest>
         RuleFor(request => request.DateFin)
             .GreaterThanOrEqualTo(request => request.DateDebut)
             .WithMessage("La date de fin doit etre superieure ou egale a la date de debut.");
+
+        RuleFor(request => request.NumeroCarte)
+            .NotEmpty().WithMessage("Le numero de carte est obligatoire.");
+
+        RuleFor(request => request.MoisExpiration)
+            .InclusiveBetween(1, 12).WithMessage("Le mois d'expiration doit etre compris entre 1 et 12.");
+
+        RuleFor(request => request.AnneeExpiration)
+            .GreaterThanOrEqualTo(DateTime.UtcNow.Year).WithMessage("L'annee d'expiration doit etre valide.");
     }
 }

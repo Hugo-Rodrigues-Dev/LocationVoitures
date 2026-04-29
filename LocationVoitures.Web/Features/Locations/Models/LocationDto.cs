@@ -13,4 +13,6 @@ public class LocationDto
     public DateOnly DateFin { get; set; }
 
     public bool Annule { get; set; }
+
+    public bool Paye { get; set; }
 }

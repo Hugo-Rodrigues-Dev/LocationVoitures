@@ -21,4 +21,7 @@ public class LocationDto
 
     [Description("Indique si la location a ete annulee.")]
     public bool Annule { get; init; }
+
+    [Description("Indique si le paiement a ete confirme.")]
+    public bool Paye { get; init; }
 }

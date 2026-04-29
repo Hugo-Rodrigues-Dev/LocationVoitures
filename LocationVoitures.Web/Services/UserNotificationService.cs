@@ -57,6 +57,7 @@ public sealed class UserNotificationService
     {
         return statusCode switch
         {
+            (HttpStatusCode)402 => NotificationSeverity.Warning,
             HttpStatusCode.BadRequest => NotificationSeverity.Warning,
             HttpStatusCode.NotFound => NotificationSeverity.Warning,
             HttpStatusCode.Conflict => NotificationSeverity.Warning,
@@ -74,6 +75,7 @@ public sealed class UserNotificationService
 
         return exception.StatusCode switch
         {
+            (HttpStatusCode)402 => "Paiement refuse",
             HttpStatusCode.BadRequest => "Saisie invalide",
             HttpStatusCode.NotFound => "Element introuvable",
             HttpStatusCode.Conflict => "Conflit de reservation",

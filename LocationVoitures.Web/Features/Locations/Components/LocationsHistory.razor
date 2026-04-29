@@ -16,6 +16,7 @@ else
                     <th scope="col">Periode</th>
                     <th scope="col">Loueur</th>
                     <th scope="col">Statut</th>
+                    <th scope="col">Paiement</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,6 +30,11 @@ else
                         <td>#@location.LoueurId</td>
                         <td>
                             <span class="@GetStatusClass(location)">@GetStatusLabel(location)</span>
+                        </td>
+                        <td>
+                            <span class="badge @(location.Paye ? "text-bg-success" : "text-bg-warning")">
+                                @(location.Paye ? "Paye" : "En attente")
+                            </span>
                         </td>
                     </tr>
                 }

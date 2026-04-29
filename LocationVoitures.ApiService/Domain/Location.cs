@@ -30,4 +30,7 @@ public class Location
 
     [Column("annule")]
     public bool Annule { get; set; }
+
+    [Column("paye")]
+    public bool Paye { get; set; }
 }

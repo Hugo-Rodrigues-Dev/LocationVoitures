@@ -64,6 +64,9 @@
             <div class="col-12 col-xl-5">
                 <section class="panel h-100">
                     <h2>Reserver cette voiture</h2>
+                    <p class="text-muted">
+                        La reservation interroge l'API metier puis le service de paiement fictif. En cas de refus, une notification explique la cause.
+                    </p>
 
                     @if (loueurs.Count == 0)
                     {

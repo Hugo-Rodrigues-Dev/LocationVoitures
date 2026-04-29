@@ -8,8 +8,8 @@
         <h1>Explorer le catalogue et reserver une voiture</h1>
         <p class="lead">
             Cette application Blazor consomme la gateway YARP puis l'API de location. Le parcours utilisateur
-            attendu avant le paiement est deja couvert : consulter le catalogue, rechercher une voiture, voir ses
-            locations et creer une reservation.
+            couvre maintenant tout le cycle demande par le TP2 : consulter le catalogue, rechercher une voiture,
+            voir ses locations, reserver et simuler un paiement.
         </p>
     </div>
 
@@ -36,9 +36,9 @@
 
         <div class="col-12 col-lg-4">
             <article class="panel h-100">
-                <h2>3. Reserver sans paiement</h2>
+                <h2>3. Reserver et payer</h2>
                 <p>
-                    Le formulaire de reservation interroge directement l'API via la gateway et affiche les erreurs metier.
+                    Le formulaire de reservation interroge directement l'API via la gateway, puis declenche une autorisation de paiement fictive.
                 </p>
                 <a class="btn btn-outline-primary" href="/catalogue">Acceder au parcours</a>
             </article>

@@ -2,6 +2,7 @@ using FluentValidation;
 using LocationVoitures.ApiService.Data;
 using LocationVoitures.ApiService.Features.Locations.Endpoints;
 using LocationVoitures.ApiService.Features.Loueurs.Endpoints;
+using LocationVoitures.ApiService.Features.Paiements.Services;
 using LocationVoitures.ApiService.Features.Voitures.Endpoints;
 using LocationVoitures.ApiService.Services;
 using Scalar.AspNetCore;
@@ -15,6 +16,10 @@ builder.AddServiceDefaults();
 builder.Services.AddProblemDetails();
 builder.AddNpgsqlDbContext<RentalDbContext>("RentalDb");
 builder.Services.AddScoped<LocationService>();
+builder.Services.AddHttpClient<PaiementApiClient>(client =>
+{
+    client.BaseAddress = new("https+http://paymentservice");
+});
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

@@ -38,6 +38,26 @@
             <label class="form-label" for="dateFin">Date de fin</label>
             <InputDate id="dateFin" class="form-control" @bind-Value="request.DateFin" />
         </div>
+
+        <div class="col-12">
+            <hr />
+            <h3 class="h5">Paiement</h3>
+        </div>
+
+        <div class="col-12">
+            <label class="form-label" for="numeroCarte">Numero de carte</label>
+            <InputText id="numeroCarte" class="form-control" @bind-Value="request.NumeroCarte" placeholder="4242 4242 4242 4242" />
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="moisExpiration">Mois d'expiration</label>
+            <InputNumber id="moisExpiration" class="form-control" @bind-Value="request.MoisExpiration" />
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="anneeExpiration">Annee d'expiration</label>
+            <InputNumber id="anneeExpiration" class="form-control" @bind-Value="request.AnneeExpiration" />
+        </div>
     </div>
 
     <div class="d-flex flex-wrap gap-2 mt-4">
@@ -92,5 +112,8 @@
     {
         request.DateDebut = DateOnly.FromDateTime(DateTime.Today);
         request.DateFin = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+        request.NumeroCarte = string.Empty;
+        request.MoisExpiration = DateTime.Today.Month;
+        request.AnneeExpiration = DateTime.Today.Year + 1;
     }
 }
