@@ -1,6 +1,6 @@
 using LocationVoitures.PaymentService.Features.Payments.Services;
 
-namespace LocationVoitures.Tests.Services;
+namespace LocationVoitures.Tests.Features.Paiements.Services;
 
 public class CardValidationServiceTests
 {
@@ -26,6 +26,14 @@ public class CardValidationServiceTests
         var result = _service.IsValidLuhn("4242 4242 4242 4241");
 
         Assert.That(result, Is.False);
+    }
+
+    [Test]
+    public void NormalizeCardNumber_ShouldKeepOnlyDigits()
+    {
+        var result = _service.NormalizeCardNumber("4242-4242 4242 4242");
+
+        Assert.That(result, Is.EqualTo("4242424242424242"));
     }
 
     [Test]

@@ -13,6 +13,9 @@ public class LocationDto
     [Description("Identifiant du loueur qui a effectue la reservation.")]
     public int LoueurId { get; init; }
 
+    [Description("Nom complet du loueur pour un affichage lisible dans le front.")]
+    public string LoueurNomComplet { get; init; } = string.Empty;
+
     [Description("Date de debut de location, incluse.")]
     public DateOnly DateDebut { get; init; }
 

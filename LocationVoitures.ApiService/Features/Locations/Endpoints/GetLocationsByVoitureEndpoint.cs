@@ -13,6 +13,7 @@ public static class GetLocationsByVoitureEndpoint
         {
             var locations = await db.Locations
                 .Include(location => location.Voiture)
+                .Include(location => location.Loueur)
                 .Where(location => location.Voiture!.Immatriculation == immatriculation)
                 .OrderBy(location => location.DateDebut)
                 .Select(location => new LocationDto
@@ -20,6 +21,7 @@ public static class GetLocationsByVoitureEndpoint
                     Id = location.Id,
                     Immatriculation = location.Voiture!.Immatriculation,
                     LoueurId = location.LoueurId,
+                    LoueurNomComplet = $"{location.Loueur!.Nom} {location.Loueur.Prenom}",
                     DateDebut = location.DateDebut,
                     DateFin = location.DateFin,
                     Annule = location.Annule,

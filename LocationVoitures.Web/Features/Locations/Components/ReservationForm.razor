@@ -47,6 +47,7 @@
         <div class="col-12">
             <label class="form-label" for="numeroCarte">Numero de carte</label>
             <InputText id="numeroCarte" class="form-control" @bind-Value="request.NumeroCarte" placeholder="4242 4242 4242 4242" />
+            <div class="form-text">Carte de test conseillee : 4242 4242 4242 4242, expiration 12 / 2030.</div>
         </div>
 
         <div class="col-12 col-md-6">
@@ -64,7 +65,7 @@
         <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
             @(isSubmitting ? "Reservation en cours..." : "Confirmer la reservation")
         </button>
-        <button type="button" class="btn btn-outline-secondary" @onclick="ResetDates">Reinitialiser les dates</button>
+        <button type="button" class="btn btn-outline-secondary" @onclick="ResetForm">Vider le formulaire</button>
     </div>
 </EditForm>
 
@@ -84,6 +85,11 @@
     protected override void OnParametersSet()
     {
         request.Immatriculation = Immatriculation;
+
+        if (request.DateDebut == default || request.DateFin == default)
+        {
+            ResetForm();
+        }
     }
 
     private async Task HandleSubmitAsync()
@@ -95,6 +101,7 @@
             request.Immatriculation = Immatriculation;
             var response = await LocationsApi.CreateAsync(request);
             await OnReservationCreated.InvokeAsync(response);
+            ResetForm();
             Notifications.ShowSuccess("Reservation confirmee",
                 $"{response.Message} Prix total : {response.PrixTotal:0.00} EUR.");
         }
@@ -108,8 +115,9 @@
         }
     }
 
-    private void ResetDates()
+    private void ResetForm()
     {
+        request.LoueurId = 0;
         request.DateDebut = DateOnly.FromDateTime(DateTime.Today);
         request.DateFin = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
         request.NumeroCarte = string.Empty;

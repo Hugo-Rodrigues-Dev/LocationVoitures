@@ -6,11 +6,6 @@
     <div class="page-header">
         <span class="eyebrow">Frontend TP1 partie 2</span>
         <h1>Explorer le catalogue et reserver une voiture</h1>
-        <p class="lead">
-            Cette application Blazor consomme la gateway YARP puis l'API de location. Le parcours utilisateur
-            couvre maintenant tout le cycle demande par le TP2 : consulter le catalogue, rechercher une voiture,
-            voir ses locations, reserver et simuler un paiement.
-        </p>
     </div>
 
     <div class="row g-4">
@@ -26,21 +21,21 @@
 
         <div class="col-12 col-lg-4">
             <article class="panel h-100">
-                <h2>2. Rechercher par immatriculation</h2>
+                <h2>2. Ouvrir l'espace reservations</h2>
                 <p>
-                    Une recherche exacte redirige vers la voiture choisie pour consulter son historique de location.
+                    Cette page dediee centralise la creation, le suivi et l'annulation des reservations pour un vehicule.
                 </p>
-                <a class="btn btn-outline-primary" href="/catalogue">Tester la recherche</a>
+                <a class="btn btn-outline-primary" href="/reservations">Gerer les reservations</a>
             </article>
         </div>
 
         <div class="col-12 col-lg-4">
             <article class="panel h-100">
-                <h2>3. Reserver et payer</h2>
+                <h2>3. Rechercher puis reserver</h2>
                 <p>
-                    Le formulaire de reservation interroge directement l'API via la gateway, puis declenche une autorisation de paiement fictive.
+                    Le catalogue permet toujours de rechercher une voiture par immatriculation puis d'ouvrir sa fiche detaillee.
                 </p>
-                <a class="btn btn-outline-primary" href="/catalogue">Acceder au parcours</a>
+                <a class="btn btn-outline-primary" href="/catalogue">Tester la recherche</a>
             </article>
         </div>
     </div>

@@ -1305,7 +1305,7 @@ Les tests ont ete etendus pour couvrir cette partie :
 
 - `LocationVoitures.Tests/Features/Locations/ReserverRequestValidatorTests.cs`
   - couverture des champs de paiement
-- `LocationVoitures.Tests/Services/CardValidationServiceTests.cs`
+- `LocationVoitures.Tests/Features/Paiements/Services/CardValidationServiceTests.cs`
   - tests Luhn
   - tests d'expiration
 
@@ -1352,3 +1352,219 @@ il faut verifier :
 - qu'une reservation avec une carte invalide est refusee
 - qu'une reservation avec une carte expiree est refusee
 - que l'historique affiche l'etat `Paye`
+
+---
+
+## 20. Amelioration du parcours reservations et renforcement des tests paiement
+
+Une fois le TP2 fonctionnel, une passe d'amelioration a ete faite pour rendre le front plus comprehensible et les tests plus solides.
+
+### 20.1. Objectif
+
+Les objectifs de cette amelioration etaient :
+
+- mieux separer la consultation d'une voiture et la gestion d'une reservation
+- permettre l'annulation d'une reservation depuis le front
+- rendre l'historique plus lisible pour un utilisateur
+- mieux exploiter l'espace d'ecran
+- ajouter des tests plus proches du comportement reel du service de paiement
+
+### 20.2. Nouvelle logique de navigation
+
+Le front distingue maintenant clairement :
+
+- la page `Catalogue`
+- la page `Fiche voiture`
+- la page `Reservations`
+
+Les liens ont ete ajoutes dans :
+
+- `LocationVoitures.Web/Components/Layout/NavMenu.razor`
+- `LocationVoitures.Web/Components/Layout/MainLayout.razor`
+
+Les cartes du catalogue proposent desormais deux actions :
+
+- `Voir la fiche`
+- `Reserver`
+
+Le composant concerne est :
+
+- `LocationVoitures.Web/Features/Voitures/Components/VoitureCard.razor`
+
+### 20.3. Page dediee a la gestion des reservations
+
+Une nouvelle page a ete creee :
+
+- `LocationVoitures.Web/Features/Locations/Pages/ReservationManagement.razor`
+
+Routes :
+
+- `/reservations`
+- `/reservations/{immatriculation}`
+
+Cette page permet :
+
+- de choisir une voiture dans une liste
+- d'ouvrir directement la gestion d'une voiture precise
+- de remplir un formulaire de reservation dans un espace dedie
+- de consulter l'historique des reservations du vehicule
+- d'annuler une reservation a venir ou en cours
+
+### 20.4. Fiche voiture simplifiee
+
+La page detail d'une voiture a ete revue pour devenir une page de consultation plus claire :
+
+- `LocationVoitures.Web/Features/Voitures/Pages/VoitureDetails.razor`
+
+Elle affiche maintenant :
+
+- les informations principales du vehicule
+- quelques indicateurs de synthese
+- l'historique des reservations
+- un bouton clair vers la page de gestion des reservations
+
+Le formulaire n'est plus imbrique dans cette page, ce qui rend le parcours plus lisible.
+
+### 20.5. Annulation de reservation cote API et frontend
+
+L'API expose deja :
+
+- `PATCH /locations/{id}/annulation`
+
+Cette route a ete rendue plus explicite :
+
+- `404` si la reservation n'existe pas
+- `409` si elle est deja annulee
+- `409` si elle est terminee et ne peut plus etre annulee
+
+Fichier concerne :
+
+- `LocationVoitures.ApiService/Features/Locations/Endpoints/AnnulerLocationEndpoint.cs`
+
+Cote front :
+
+- un bouton `Annuler` apparait dans l'historique lorsque l'action est possible
+- l'annulation passe par `LocationsApiClient.CancelAsync(...)`
+- une notification utilisateur claire est affichee en succes ou en erreur
+
+Fichiers concernes :
+
+- `LocationVoitures.Web/Features/Locations/Components/LocationsHistory.razor`
+- `LocationVoitures.Web/Features/Locations/Services/LocationsApiClient.cs`
+- `LocationVoitures.Web/Features/Locations/Models/AnnulationLocationResponse.cs`
+
+### 20.6. Historique de reservation plus lisible
+
+Pour eviter d'afficher seulement `LoueurId`, le DTO `LocationDto` a ete enrichi avec :
+
+- `LoueurNomComplet`
+
+Cela a ete ajoute :
+
+- dans l'API : `LocationVoitures.ApiService/Features/Locations/Responses/LocationDto.cs`
+- dans les projections EF des endpoints de lecture des locations
+- dans le front : `LocationVoitures.Web/Features/Locations/Models/LocationDto.cs`
+
+L'utilisateur voit donc :
+
+- le nom complet du loueur
+- l'identifiant technique en information secondaire
+- le statut de la reservation
+- le statut du paiement
+- l'action d'annulation si elle est pertinente
+
+### 20.7. Formulaire de reservation ameliore
+
+Le formulaire :
+
+- `LocationVoitures.Web/Features/Locations/Components/ReservationForm.razor`
+
+a ete clarifie avec :
+
+- un texte d'introduction
+- un rappel de la carte de test
+- un bouton `Vider le formulaire`
+- une reinitialisation automatique apres reservation reussie
+
+### 20.8. Ajustements ergonomiques et styles
+
+Les styles ont ete etendus pour mieux utiliser l'espace horizontal :
+
+- header en deux colonnes
+- carte d'action laterale
+- grille de selection des voitures
+- page de reservation en layout `main + side`
+
+Fichiers styles concernes :
+
+- `LocationVoitures.Web/wwwroot/app.css`
+- `LocationVoitures.Web/Components/Layout/MainLayout.razor.css`
+- `LocationVoitures.Web/Components/Layout/NavMenu.razor.css`
+
+### 20.9. Tests supplementaires sur le service de paiement
+
+Les tests ont ete etendus et mieux ranges par feature :
+
+- `LocationVoitures.Tests/Features/Paiements/Services/CardValidationServiceTests.cs`
+- `LocationVoitures.Tests/Features/Paiements/Validators/PaymentAuthorizationRequestValidatorTests.cs`
+- `LocationVoitures.Tests/Features/Paiements/Integration/AuthorizePaymentEndpointTests.cs`
+
+Les tests d'integration du service de paiement couvrent maintenant :
+
+- une carte valide
+- une carte invalide au sens de Luhn
+- une carte expiree
+- une requete invalide renvoyant un `400`
+
+Pour permettre ce test HTTP en memoire :
+
+- `Microsoft.AspNetCore.Mvc.Testing` a ete ajoute au projet de tests
+- un marqueur d'assembly a ete ajoute dans `LocationVoitures.PaymentService/PaymentServiceAssemblyMarker.cs`
+
+### 20.10. Stabilisation des builds sous WSL
+
+Le `PaymentService` a ete configure avec :
+
+- `<UseAppHost>false</UseAppHost>`
+
+dans :
+
+- `LocationVoitures.PaymentService/LocationVoitures.PaymentService.csproj`
+
+Cela evite un probleme de generation d'apphost sur le disque Windows monte dans WSL pendant `dotnet test`.
+
+### 20.11. Verification
+
+Compilation :
+
+```bash
+/home/hugo/.dotnet/dotnet build LocationVoitures.AppHost/LocationVoitures.AppHost.csproj
+```
+
+Tests :
+
+```bash
+/home/hugo/.dotnet/dotnet test LocationVoitures.Tests/LocationVoitures.Tests.csproj
+```
+
+Resultat obtenu :
+
+- `36` tests reussis
+- `0` echec
+
+### 20.12. Validation manuelle attendue
+
+Apres lancement :
+
+```bash
+/home/hugo/.dotnet/dotnet run --project LocationVoitures.AppHost
+```
+
+il faut verifier :
+
+- que le lien `Reservations` apparait dans la navigation
+- qu'une voiture peut etre ouverte directement dans `/reservations/{immatriculation}`
+- qu'une reservation peut etre creee depuis cette page
+- qu'une reservation future peut etre annulee depuis l'historique
+- qu'une reservation deja annulee ne peut pas etre annulee une seconde fois
+- qu'un refus de paiement affiche une notification lisible

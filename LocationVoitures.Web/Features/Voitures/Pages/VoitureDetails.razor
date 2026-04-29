@@ -3,21 +3,18 @@
 @using LocationVoitures.Web.Features.Locations.Components
 @using LocationVoitures.Web.Features.Locations.Models
 @using LocationVoitures.Web.Features.Locations.Services
-@using LocationVoitures.Web.Features.Loueurs.Models
-@using LocationVoitures.Web.Features.Loueurs.Services
 @using LocationVoitures.Web.Features.Voitures.Models
 @using LocationVoitures.Web.Features.Voitures.Services
 @using LocationVoitures.Web.Services
 
 @inject VoituresApiClient VoituresApi
 @inject LocationsApiClient LocationsApi
-@inject LoueursApiClient LoueursApi
 @inject UserNotificationService Notifications
 
 <PageTitle>Fiche voiture</PageTitle>
 
 <section class="page-section">
-    <p class="mb-3">
+    <p class="mb-0">
         <a href="/catalogue" class="link-secondary">Retour au catalogue</a>
     </p>
 
@@ -32,57 +29,78 @@
     else
     {
         <div class="page-header">
-            <span class="eyebrow">@voiture.Categorie</span>
-            <h1>@voiture.Marque @voiture.Modele</h1>
-            <p class="lead">
-                Immatriculation : <strong>@voiture.Immatriculation</strong> ·
-                Prix : <strong>@voiture.PrixParJour.ToString("0.00") EUR / jour</strong>
-            </p>
-            <p>
-                <span class="badge @(voiture.EstDisponible ? "text-bg-success" : "text-bg-secondary")">
-                    @(voiture.EstDisponible ? "Disponible aujourd'hui" : "Indisponible aujourd'hui")
-                </span>
-            </p>
+            <div>
+                <span class="eyebrow">@voiture.Categorie</span>
+                <h1>@voiture.Marque @voiture.Modele</h1>
+                <p class="lead">
+                    Immatriculation <strong>@voiture.Immatriculation</strong> ·
+                    Prix <strong>@voiture.PrixParJour.ToString("0.00") EUR / jour</strong>
+                </p>
+                <p class="mb-0">
+                    <span class="badge @(voiture.EstDisponible ? "text-bg-success" : "text-bg-secondary")">
+                        @(voiture.EstDisponible ? "Disponible aujourd'hui" : "Indisponible aujourd'hui")
+                    </span>
+                </p>
+            </div>
         </div>
 
-        <div class="row g-4">
-            <div class="col-12 col-xl-7">
-                <section class="panel h-100">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                        <div>
-                            <h2 class="mb-1">Historique des locations</h2>
-                            <p class="text-muted mb-0">
-                                Les locations sont triees par date de debut pour montrer les reservations passees, en cours et futures.
-                            </p>
-                        </div>
-                    </div>
-
-                    <LocationsHistory Locations="locations" />
-                </section>
-            </div>
-
-            <div class="col-12 col-xl-5">
-                <section class="panel h-100">
-                    <h2>Reserver cette voiture</h2>
-                    <p class="text-muted">
-                        La reservation interroge l'API metier puis le service de paiement fictif. En cas de refus, une notification explique la cause.
+        <section class="panel action-panel">
+            <div class="action-panel__content">
+                <div>
+                    <span class="metric-label">Action principale</span>
+                    <strong class="hero-action-title">Passer a la gestion de reservation</strong>
+                    <p class="text-muted mb-0">
+                        Utilisez la page dediee pour reserver, consulter l'historique complet et annuler une reservation a venir.
                     </p>
+                </div>
 
-                    @if (loueurs.Count == 0)
-                    {
-                        <div class="alert alert-warning mb-0" role="alert">
-                            Aucun loueur n'est disponible pour creer une reservation.
-                        </div>
-                    }
-                    else
-                    {
-                        <ReservationForm Immatriculation="@voiture.Immatriculation"
-                                         Loueurs="loueurs"
-                                         OnReservationCreated="HandleReservationCreatedAsync" />
-                    }
-                </section>
+                <div class="action-panel__buttons">
+                    <a class="btn btn-primary" href="/reservations/@voiture.Immatriculation">Reserver cette voiture</a>
+                    <a class="btn btn-outline-primary" href="/catalogue">Continuer a comparer</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <article class="metric-card">
+                    <span class="metric-label">Reservations</span>
+                    <strong class="metric-value">@locations.Count</strong>
+                    <div class="text-muted">Historique connu pour ce vehicule</div>
+                </article>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <article class="metric-card">
+                    <span class="metric-label">Reservations a venir</span>
+                    <strong class="metric-value">@locations.Count(item => !item.Annule && item.DateDebut > DateOnly.FromDateTime(DateTime.Today))</strong>
+                    <div class="text-muted">Periodes futures deja planifiees</div>
+                </article>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <article class="metric-card">
+                    <span class="metric-label">Annulations</span>
+                    <strong class="metric-value">@locations.Count(item => item.Annule)</strong>
+                    <div class="text-muted">Reservations annulees conservees en historique</div>
+                </article>
             </div>
         </div>
+
+        <section class="panel">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                <div>
+                    <h2 class="mb-1">Historique des locations</h2>
+                    <p class="text-muted mb-0">
+                        Cette vue reste informative. Pour reserver ou annuler, utilisez la page de gestion dediee.
+                    </p>
+                </div>
+
+                <a class="btn btn-outline-primary" href="/reservations/@voiture.Immatriculation">Ouvrir la gestion de reservation</a>
+            </div>
+
+            <LocationsHistory Locations="locations" />
+        </section>
     }
 </section>
 
@@ -92,7 +110,6 @@
 
     private VoitureDto? voiture;
     private IReadOnlyList<LocationDto> locations = [];
-    private IReadOnlyList<LoueurDto> loueurs = [];
     private string? loadError;
     private bool isLoading = true;
 
@@ -110,7 +127,6 @@
         {
             voiture = await VoituresApi.GetByImmatriculationAsync(Immatriculation);
             locations = await LocationsApi.GetByVoitureAsync(Immatriculation);
-            loueurs = await LoueursApi.GetAllAsync();
         }
         catch (Exception ex)
         {
@@ -120,20 +136,6 @@
         finally
         {
             isLoading = false;
-        }
-    }
-
-    private async Task HandleReservationCreatedAsync(ReserverResponse _)
-    {
-        try
-        {
-            locations = await LocationsApi.GetByVoitureAsync(Immatriculation);
-            voiture = await VoituresApi.GetByImmatriculationAsync(Immatriculation);
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Notifications.ShowException(ex, "Rafraichissement impossible");
         }
     }
 }

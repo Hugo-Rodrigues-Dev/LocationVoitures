@@ -1,0 +1,285 @@
+@page "/reservations"
+@page "/reservations/{Immatriculation}"
+
+@using LocationVoitures.Web.Features.Locations.Components
+@using LocationVoitures.Web.Features.Locations.Models
+@using LocationVoitures.Web.Features.Locations.Services
+@using LocationVoitures.Web.Features.Loueurs.Models
+@using LocationVoitures.Web.Features.Loueurs.Services
+@using LocationVoitures.Web.Features.Voitures.Models
+@using LocationVoitures.Web.Features.Voitures.Services
+@using LocationVoitures.Web.Services
+
+@inject VoituresApiClient VoituresApi
+@inject LocationsApiClient LocationsApi
+@inject LoueursApiClient LoueursApi
+@inject NavigationManager Navigation
+@inject UserNotificationService Notifications
+
+<PageTitle>Gestion des reservations</PageTitle>
+
+<section class="page-section">
+    <div class="page-header page-header--split">
+        <div>
+            <span class="eyebrow">Reservations</span>
+        </div>
+    </div>
+
+    <section class="panel">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-lg-6">
+                <label class="form-label" for="selectedVehicle">Voiture a gerer</label>
+                <select id="selectedVehicle"
+                        class="form-select"
+                        value="@selectedImmatriculation"
+                        @onchange="NavigateToSelectedVehicle">
+                    <option value="">Choisir une voiture</option>
+                    @foreach (var voiture in catalogue)
+                    {
+                        <option value="@voiture.Immatriculation">
+                            @($"{voiture.Marque} {voiture.Modele} - {voiture.Immatriculation}")
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div class="quick-actions">
+                    <a class="btn btn-outline-secondary" href="/catalogue">Parcourir le catalogue</a>
+                    @if (selectedVoiture is not null)
+                    {
+                        <a class="btn btn-outline-primary" href="/catalogue/@selectedVoiture.Immatriculation">Voir la fiche detaillee</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <div class="alert alert-danger" role="alert">@loadError</div>
+    }
+    else if (isLoading)
+    {
+        <p><em>Chargement de l'espace de reservation...</em></p>
+    }
+    else if (selectedVoiture is null)
+    {
+        <div class="empty-state">
+            <h3>Aucune voiture selectionnee</h3>
+            <p class="mb-3">
+                Choisissez une voiture dans la liste ci-dessus, ou ouvrez directement l'espace de reservation depuis le catalogue.
+            </p>
+
+            @if (catalogue.Count > 0)
+            {
+                <div class="selection-grid">
+                    @foreach (var voiture in catalogue)
+                    {
+                        <button type="button" class="selection-card" @onclick="() => OpenVehicle(voiture.Immatriculation)">
+                            <span class="selection-card__eyebrow">@voiture.Categorie</span>
+                            <strong>@voiture.Marque @voiture.Modele</strong>
+                            <span>@voiture.Immatriculation</span>
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <article class="metric-card">
+                    <span class="metric-label">Vehicule selectionne</span>
+                    <strong class="metric-value metric-value--small">@selectedVoiture.Immatriculation</strong>
+                    <div class="text-muted">@selectedVoiture.Marque @selectedVoiture.Modele</div>
+                </article>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <article class="metric-card">
+                    <span class="metric-label">Prix journalier</span>
+                    <strong class="metric-value">@selectedVoiture.PrixParJour.ToString("0.00")</strong>
+                    <div class="text-muted">EUR / jour</div>
+                </article>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <article class="metric-card">
+                    <span class="metric-label">Reservations suivies</span>
+                    <strong class="metric-value">@locations.Count</strong>
+                    <div class="text-muted">@GetAvailabilityLabel(selectedVoiture)</div>
+                </article>
+            </div>
+        </div>
+
+        <div class="reservation-layout">
+            <section class="panel reservation-layout__main">
+                <h2>Nouvelle reservation</h2>
+                @if (loueurs.Count == 0)
+                {
+                    <div class="alert alert-warning mb-0" role="alert">
+                        Aucun loueur n'est disponible pour creer une reservation.
+                    </div>
+                }
+                else
+                {
+                    <ReservationForm Immatriculation="@selectedVoiture.Immatriculation"
+                                     Loueurs="loueurs"
+                                     OnReservationCreated="HandleReservationCreatedAsync" />
+                }
+            </section>
+
+            <section class="panel reservation-layout__side">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                    <div>
+                        <h2 class="mb-1">Reservations existantes</h2>
+                        <p class="text-muted mb-0">
+                            Suivez l'historique, identifiez les reservations a venir et annulez celles qui ne doivent plus etre maintenues.
+                        </p>
+                    </div>
+                </div>
+
+                <LocationsHistory Locations="locations"
+                                  AllowCancellation="true"
+                                  PendingCancellationId="pendingCancellationId"
+                                  OnCancelRequested="HandleCancellationAsync" />
+            </section>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public string? Immatriculation { get; set; }
+
+    private IReadOnlyList<VoitureDto> catalogue = [];
+    private IReadOnlyList<LocationDto> locations = [];
+    private IReadOnlyList<LoueurDto> loueurs = [];
+    private VoitureDto? selectedVoiture;
+    private string selectedImmatriculation = string.Empty;
+    private string? loadError;
+    private bool isLoading = true;
+    private int? pendingCancellationId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        selectedImmatriculation = Immatriculation ?? string.Empty;
+        await LoadPageAsync();
+    }
+
+    private async Task LoadPageAsync()
+    {
+        isLoading = true;
+        loadError = null;
+
+        try
+        {
+            var catalogueTask = VoituresApi.GetCatalogueAsync();
+            var loueursTask = LoueursApi.GetAllAsync();
+
+            await Task.WhenAll(catalogueTask, loueursTask);
+
+            catalogue = catalogueTask.Result
+                .OrderBy(voiture => voiture.Marque)
+                .ThenBy(voiture => voiture.Modele)
+                .ToList();
+
+            loueurs = loueursTask.Result
+                .OrderBy(loueur => loueur.Nom)
+                .ThenBy(loueur => loueur.Prenom)
+                .ToList();
+
+            if (string.IsNullOrWhiteSpace(selectedImmatriculation))
+            {
+                selectedVoiture = null;
+                locations = [];
+                return;
+            }
+
+            await LoadSelectedVehicleAsync(selectedImmatriculation);
+        }
+        catch (Exception ex)
+        {
+            loadError = "Impossible de charger l'espace de reservation.";
+            Notifications.ShowException(ex, "Chargement impossible");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadSelectedVehicleAsync(string immatriculation)
+    {
+        selectedVoiture = await VoituresApi.GetByImmatriculationAsync(immatriculation);
+        locations = await LocationsApi.GetByVoitureAsync(immatriculation);
+        selectedImmatriculation = selectedVoiture.Immatriculation;
+    }
+
+    private void NavigateToSelectedVehicle(ChangeEventArgs args)
+    {
+        var immatriculation = args.Value?.ToString();
+
+        if (string.IsNullOrWhiteSpace(immatriculation))
+        {
+            Navigation.NavigateTo("/reservations");
+            return;
+        }
+
+        Navigation.NavigateTo($"/reservations/{Uri.EscapeDataString(immatriculation)}");
+    }
+
+    private void OpenVehicle(string immatriculation)
+    {
+        Navigation.NavigateTo($"/reservations/{Uri.EscapeDataString(immatriculation)}");
+    }
+
+    private async Task HandleReservationCreatedAsync(ReserverResponse _)
+    {
+        await RefreshSelectedVehicleAsync();
+    }
+
+    private async Task HandleCancellationAsync(int locationId)
+    {
+        pendingCancellationId = locationId;
+
+        try
+        {
+            await LocationsApi.CancelAsync(locationId);
+            await RefreshSelectedVehicleAsync();
+            Notifications.ShowSuccess("Reservation annulee",
+                "La reservation selectionnee a bien ete annulee.");
+        }
+        catch (Exception ex)
+        {
+            Notifications.ShowException(ex, "Annulation impossible");
+        }
+        finally
+        {
+            pendingCancellationId = null;
+        }
+    }
+
+    private async Task RefreshSelectedVehicleAsync()
+    {
+        if (selectedVoiture is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await LoadSelectedVehicleAsync(selectedVoiture.Immatriculation);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Notifications.ShowException(ex, "Rafraichissement impossible");
+        }
+    }
+
+    private static string GetAvailabilityLabel(VoitureDto voiture)
+        => voiture.EstDisponible ? "Disponible aujourd'hui" : "Indisponible aujourd'hui";
+}

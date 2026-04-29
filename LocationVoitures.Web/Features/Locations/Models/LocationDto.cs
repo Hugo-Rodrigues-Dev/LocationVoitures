@@ -8,6 +8,8 @@ public class LocationDto
 
     public int LoueurId { get; set; }
 
+    public string LoueurNomComplet { get; set; } = string.Empty;
+
     public DateOnly DateDebut { get; set; }
 
     public DateOnly DateFin { get; set; }

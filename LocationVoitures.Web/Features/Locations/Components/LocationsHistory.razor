@@ -17,6 +17,10 @@ else
                     <th scope="col">Loueur</th>
                     <th scope="col">Statut</th>
                     <th scope="col">Paiement</th>
+                    @if (AllowCancellation)
+                    {
+                        <th scope="col" class="text-end">Action</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -27,7 +31,10 @@ else
                             <strong>@location.DateDebut.ToString("dd/MM/yyyy")</strong>
                             <div class="text-muted small">au @location.DateFin.ToString("dd/MM/yyyy")</div>
                         </td>
-                        <td>#@location.LoueurId</td>
+                        <td>
+                            <strong>@location.LoueurNomComplet</strong>
+                            <div class="text-muted small">Loueur #@location.LoueurId</div>
+                        </td>
                         <td>
                             <span class="@GetStatusClass(location)">@GetStatusLabel(location)</span>
                         </td>
@@ -36,6 +43,24 @@ else
                                 @(location.Paye ? "Paye" : "En attente")
                             </span>
                         </td>
+                        @if (AllowCancellation)
+                        {
+                            <td class="text-end">
+                                @if (CanBeCancelled(location))
+                                {
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            disabled="@IsCancellationPending(location.Id)"
+                                            @onclick="() => CancelAsync(location.Id)">
+                                        @(IsCancellationPending(location.Id) ? "Annulation..." : "Annuler")
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Aucune action</span>
+                                }
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
@@ -46,6 +71,15 @@ else
 @code {
     [Parameter]
     public IReadOnlyList<LocationDto> Locations { get; set; } = [];
+
+    [Parameter]
+    public bool AllowCancellation { get; set; }
+
+    [Parameter]
+    public int? PendingCancellationId { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnCancelRequested { get; set; }
 
     private static string GetStatusLabel(LocationDto location)
     {
@@ -78,5 +112,28 @@ else
             "Terminee" => "badge text-bg-light",
             _ => "badge text-bg-success"
         };
+    }
+
+    private static bool CanBeCancelled(LocationDto location)
+    {
+        if (location.Annule)
+        {
+            return false;
+        }
+
+        return location.DateFin >= DateOnly.FromDateTime(DateTime.Today);
+    }
+
+    private bool IsCancellationPending(int locationId)
+        => PendingCancellationId == locationId;
+
+    private async Task CancelAsync(int locationId)
+    {
+        if (!OnCancelRequested.HasDelegate)
+        {
+            return;
+        }
+
+        await OnCancelRequested.InvokeAsync(locationId);
     }
 }
